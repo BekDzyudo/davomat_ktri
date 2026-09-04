@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@plugin "daisyui" {
+  themes: davomat --default, night --prefersdark;
+}
+
+@plugin "daisyui/theme" {
+  name: "davomat";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: oklch(100% 0 0);
+  --color-base-200: oklch(96.5% 0.012 265);
+  --color-base-300: oklch(92% 0.016 265);
+  --color-base-content: oklch(22% 0.03 260);
+
+  --color-primary: oklch(58% 0.21 276);
+  --color-primary-content: oklch(98% 0.015 276);
+
+  --color-secondary: oklch(69% 0.17 174);
+  --color-secondary-content: oklch(20% 0.03 174);
+
+  --color-accent: oklch(76% 0.17 55);
+  --color-accent-content: oklch(22% 0.04 55);
+
+  --color-neutral: oklch(28% 0.03 265);
+  --color-neutral-content: oklch(96% 0.01 265);
+
+  --color-info: oklch(70% 0.15 231);
+  --color-info-content: oklch(20% 0.03 231);
+
+  --color-success: oklch(71% 0.18 155);
+  --color-success-content: oklch(20% 0.04 155);
+
+  --color-warning: oklch(80% 0.17 80);
+  --color-warning-content: oklch(22% 0.04 80);
+
+  --color-error: oklch(63% 0.22 22);
+  --color-error-content: oklch(98% 0.02 22);
+
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+body {
+  margin: 0;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.35s ease-out both;
+}
+
+/* Jadval qatorlariga zebra effekti — barcha .table elementlariga avtomatik
+   tarqaladi. */
+.table tbody tr:nth-child(even) {
+  background-color: color-mix(in oklch, var(--color-base-200) 40%, transparent);
+}

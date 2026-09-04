@@ -1,0 +1,73 @@
+import { DAYS, TIME_SLOTS } from '../data/mockSchedule'
+import { apiFetch, fetchAllPages } from './client'
+
+const WEEKDAY_BY_KEY = Object.fromEntries(DAYS.map((d, i) => [d.key, i + 1]))
+const KEY_BY_WEEKDAY = Object.fromEntries(DAYS.map((d, i) => [i + 1, d.key]))
+
+function slotToTimes(slot) {
+  const [start, end] = slot.split(' - ')
+  return { start_time: `${start}:00`, end_time: `${end}:00` }
+}
+
+function timesToSlot(startTime, endTime) {
+  const start = startTime?.slice(0, 5)
+  const end = endTime?.slice(0, 5)
+  return TIME_SLOTS.find((s) => s === `${start} - ${end}`) ?? `${start} - ${end}`
+}
+
+function currentAcademicYear() {
+  const now = new Date()
+  const y = now.getFullYear()
+  return now.getMonth() >= 7 ? `${y}-${y + 1}` : `${y - 1}-${y}`
+}
+
+function mapLessonFromApi(l) {
+  return {
+    id: l.id,
+    day: KEY_BY_WEEKDAY[l.weekday] ?? 'mon',
+    timeSlot: timesToSlot(l.start_time, l.end_time),
+    subjectId: l.subject,
+    subjectName: l.subject_name,
+    teacherId: l.teacher,
+    teacherName: l.teacher_name,
+    groupId: l.group,
+    groupName: l.group_name,
+    room: l.room,
+    semester: l.semester,
+    academicYear: l.academic_year,
+  }
+}
+
+function lessonToApiBody(input) {
+  const { start_time, end_time } = slotToTimes(input.timeSlot)
+  return {
+    subject: input.subjectId,
+    group: input.groupId,
+    teacher: input.teacherId,
+    weekday: WEEKDAY_BY_KEY[input.day],
+    start_time,
+    end_time,
+    room: input.room,
+    semester: input.semester ?? '1',
+    academic_year: input.academicYear ?? currentAcademicYear(),
+  }
+}
+
+export async function listSchedule() {
+  const raw = await fetchAllPages('/api/schedule/')
+  return raw.map(mapLessonFromApi)
+}
+
+export async function createLesson(input) {
+  const data = await apiFetch('/api/schedule/', { method: 'POST', body: lessonToApiBody(input) })
+  return mapLessonFromApi(data)
+}
+
+export async function updateLesson(id, input) {
+  const data = await apiFetch(`/api/schedule/${id}/`, { method: 'PATCH', body: lessonToApiBody(input) })
+  return mapLessonFromApi(data)
+}
+
+export function deleteLesson(id) {
+  return apiFetch(`/api/schedule/${id}/`, { method: 'DELETE' })
+}

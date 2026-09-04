@@ -1,0 +1,96 @@
+{
+  "app": {
+    "name": "Kasbiy ta'limni rivojlantirish instituti"
+  },
+  "nav": {
+    "dashboard": "Bosh sahifa",
+    "users": "Foydalanuvchilar",
+    "faculties": "Fakultetlar",
+    "groups": "Guruhlar",
+    "subjects": "Modullar",
+    "schedule": "Dars jadvali",
+    "attendance": "Davomat",
+    "reports": "Hisobotlar"
+  },
+  "header": {
+    "logout": "Chiqish",
+    "toggleTheme": "Mavzuni almashtirish"
+  },
+  "roles": {
+    "superadmin": "SuperAdmin",
+    "admin": "Admin",
+    "dekan": "Dekan",
+    "oqituvchi": "O'qituvchi",
+    "talaba": "Talaba"
+  },
+  "pages": {
+    "login": {
+      "title": "Tizimga kirish",
+      "subtitle": "Ta'lim muassasasi davomat tizimi",
+      "username": "Login",
+      "password": "Parol",
+      "forgotPassword": "Parolni unutdingizmi?",
+      "submit": "Kirish",
+      "errors": {
+        "required": "Bu maydonni to'ldiring",
+        "network": "Serverga ulanib bo'lmadi. Internet aloqasini tekshiring."
+      }
+    },
+    "forgotPassword": {
+      "title": "Parolni tiklash",
+      "backToLogin": "Kirish sahifasiga qaytish",
+      "step1": {
+        "label": "Email manzil",
+        "placeholder": "email@misol.uz",
+        "submit": "Kod yuborish"
+      },
+      "step2": {
+        "description": "{{email}} manziliga yuborilgan 6 xonali kodni kiriting",
+        "label": "Tasdiqlash kodi",
+        "placeholder": "000000",
+        "submit": "Tasdiqlash"
+      },
+      "step3": {
+        "label": "Yangi parol",
+        "confirmLabel": "Yangi parolni takrorlang",
+        "submit": "Parolni saqlash"
+      },
+      "success": {
+        "title": "Parol muvaffaqiyatli yangilandi",
+        "description": "Endi yangi parolingiz bilan tizimga kirishingiz mumkin.",
+        "submit": "Kirish sahifasiga o'tish"
+      },
+      "errors": {
+        "required": "Bu maydonni to'ldiring",
+        "invalidEmail": "Email manzil noto'g'ri formatda",
+        "codeLength": "Kod 6 ta raqamdan iborat bo'lishi kerak",
+        "passwordMin": "Parol kamida 6 ta belgidan iborat bo'lishi kerak",
+        "passwordMismatch": "Parollar mos kelmadi"
+      }
+    },
+    "dashboard": {
+      "title": "Bosh sahifa"
+    },
+    "users": {
+      "title": "Foydalanuvchilar"
+    },
+    "groups": {
+      "title": "Guruhlar"
+    },
+    "subjects": {
+      "title": "Modullar"
+    },
+    "schedule": {
+      "title": "Dars jadvali"
+    },
+    "attendance": {
+      "title": "Davomat"
+    },
+    "reports": {
+      "title": "Hisobotlar"
+    },
+    "notFound": {
+      "title": "Sahifa topilmadi"
+    }
+  }
+}
