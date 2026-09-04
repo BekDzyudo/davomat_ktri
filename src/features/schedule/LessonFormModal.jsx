@@ -5,7 +5,7 @@ import Input from '../../components/form/Input'
 import Select from '../../components/form/Select'
 import Icon from '../../components/Icon'
 import Modal from '../../components/Modal'
-import { DAYS, TIME_SLOTS } from '../../data/mockSchedule'
+import { DAYS, SCHEDULE_ROWS } from '../../data/mockSchedule'
 import { isRequired } from '../../utils/validators'
 
 function FieldLabel({ icon, children }) {
@@ -36,7 +36,17 @@ export default function LessonFormModal({
   const [teacherId, setTeacherId] = useState(lesson?.teacherId ?? '')
   const [room, setRoom] = useState(lesson?.room ?? '')
   const [day, setDay] = useState(lesson?.day ?? defaultDay ?? DAYS[0].key)
-  const [timeSlot, setTimeSlot] = useState(lesson?.timeSlot ?? defaultTimeSlot ?? TIME_SLOTS[0])
+
+  const initialTimeSlot = lesson?.timeSlot ?? defaultTimeSlot ?? SCHEDULE_ROWS[0].timeSlot
+  const matchedRow = SCHEDULE_ROWS.find((r) => r.timeSlot === initialTimeSlot)
+  // Agar dars eski (SCHEDULE_ROWS'da yo'q) vaqtga ega bo'lsa, uni ro'yxatga
+  // qo'shamiz — aks holda ochilganda vaqti sezilmasdan almashtirilib qo'yiladi.
+  const [rowOptions] = useState(() =>
+    matchedRow ? SCHEDULE_ROWS : [...SCHEDULE_ROWS, { key: initialTimeSlot, label: null, timeSlot: initialTimeSlot }],
+  )
+  const [scheduleRowKey, setScheduleRowKey] = useState(matchedRow?.key ?? initialTimeSlot)
+  const timeSlot = rowOptions.find((r) => r.key === scheduleRowKey)?.timeSlot ?? initialTimeSlot
+
   const [errors, setErrors] = useState({})
   const [conflicts, setConflicts] = useState([])
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -121,9 +131,12 @@ export default function LessonFormModal({
           />
           <Select
             label={<FieldLabel icon="clock">Vaqt</FieldLabel>}
-            value={timeSlot}
-            onChange={setTimeSlot}
-            options={TIME_SLOTS.map((t) => ({ value: t, label: t }))}
+            value={scheduleRowKey}
+            onChange={setScheduleRowKey}
+            options={rowOptions.map((r) => ({
+              value: r.key,
+              label: r.label ? `${r.label} (${r.timeSlot})` : `Eski jadval (${r.timeSlot})`,
+            }))}
           />
         </div>
 

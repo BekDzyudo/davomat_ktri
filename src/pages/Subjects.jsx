@@ -24,8 +24,7 @@ import AssignSubjectModal from '../features/subjects/AssignSubjectModal'
 import SubjectFormModal from '../features/subjects/SubjectFormModal'
 import { useTableQuery } from '../hooks/useTableQuery'
 
-const filterSubject = (subject, query) =>
-  subject.name.toLowerCase().includes(query) || subject.code.toLowerCase().includes(query)
+const filterSubject = (subject, query) => subject.name.toLowerCase().includes(query)
 
 export default function Subjects() {
   const [subjects, setSubjects] = useState([])
@@ -130,7 +129,7 @@ export default function Subjects() {
 
       <div className="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm sm:p-6">
         <div className="mb-4">
-          <SearchInput value={query} onChange={setQuery} placeholder="Modul nomi yoki kodi bo'yicha qidirish" />
+          <SearchInput value={query} onChange={setQuery} placeholder="Modul nomi bo'yicha qidirish" />
         </div>
 
         {loadError ? (
@@ -148,7 +147,6 @@ export default function Subjects() {
                 <tr className="text-xs uppercase text-base-content/50">
                   <th className="w-10">#</th>
                   <th>Nomi</th>
-                  <th>Kodi</th>
                   <th>Nazariy / Amaliy</th>
                   <th>Jami soat</th>
                   <th>O'qituvchi</th>
@@ -161,7 +159,6 @@ export default function Subjects() {
                   <tr key={subject.id}>
                     <td className="text-base-content/40">{(page - 1) * pageSize + index + 1}</td>
                     <td className="font-medium text-base-content">{subject.name}</td>
-                    <td className="text-base-content/70">{subject.code}</td>
                     <td className="text-base-content/70">
                       {subject.theoryHours} / {subject.practiceHours}
                     </td>

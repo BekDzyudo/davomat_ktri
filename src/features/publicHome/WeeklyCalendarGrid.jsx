@@ -3,7 +3,7 @@ import Icon from '../../components/Icon'
 import { DAYS } from '../../data/mockSchedule'
 import { getAccentColor } from '../../utils/colors'
 import { addDays, formatDayMonth } from '../../utils/date'
-import { deriveTimeSlots } from '../../utils/publicSchedule'
+import { deriveScheduleRows } from '../../utils/publicSchedule'
 
 export default function WeeklyCalendarGrid({
   lessons,
@@ -14,7 +14,7 @@ export default function WeeklyCalendarGrid({
   weekStart,
   todayKey,
 }) {
-  const timeSlots = useMemo(() => deriveTimeSlots(lessons), [lessons])
+  const rows = useMemo(() => deriveScheduleRows(lessons), [lessons])
 
   return (
     <div className="animate-fade-in-up flex h-full flex-col overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm">
@@ -23,7 +23,7 @@ export default function WeeklyCalendarGrid({
           className="grid h-full min-w-225"
           style={{
             gridTemplateColumns: `110px repeat(${DAYS.length}, minmax(150px, 1fr))`,
-            gridTemplateRows: `auto repeat(${timeSlots.length}, minmax(3.25rem, 1fr))`,
+            gridTemplateRows: `auto repeat(${rows.length}, minmax(3.25rem, 1fr))`,
           }}
         >
           <div className="border-b border-r border-base-300 bg-base-200 p-3" />
@@ -42,17 +42,27 @@ export default function WeeklyCalendarGrid({
             </div>
           ))}
 
-          {timeSlots.map((slot) => (
-            <Fragment key={slot}>
+          {rows.map(({ key, label, timeSlot }) => (
+            <Fragment key={key}>
               <div className="flex items-center gap-1.5 border-b border-r border-base-300 bg-base-200 p-2.5 text-[11px] font-semibold text-base-content/60 portrait:text-xs">
                 <Icon name="clock" className="size-3 shrink-0" />
-                {slot}
+                <div className="flex flex-col leading-tight">
+                  {label ? (
+                    <span className="text-base-content/80">{label}</span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-warning">
+                      <Icon name="alertTriangle" className="size-2.5 shrink-0" />
+                      Eski jadval
+                    </span>
+                  )}
+                  <span className="font-normal opacity-80">{timeSlot}</span>
+                </div>
               </div>
               {DAYS.map((d) => {
-                const cellLessons = lessonsFor(d.key, slot)
+                const cellLessons = lessonsFor(d.key, timeSlot)
                 return (
                   <div
-                    key={`${d.key}-${slot}`}
+                    key={`${d.key}-${key}`}
                     className="flex min-h-16 flex-col gap-1 border-b border-r border-base-300 p-1.5 last:border-r-0"
                   >
                     {cellLessons.map((lesson) => {

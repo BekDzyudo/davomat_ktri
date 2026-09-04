@@ -2,12 +2,12 @@ import { Fragment, useMemo } from 'react'
 import Icon from '../../components/Icon'
 import { DAYS } from '../../data/mockSchedule'
 import { addDays, formatDayMonth } from '../../utils/date'
-import { deriveTimeSlots } from '../../utils/publicSchedule'
+import { deriveScheduleRows } from '../../utils/publicSchedule'
 
 const CELL_BASE = 'min-h-24 border-b border-r border-base-300 p-1.5 text-left last:border-r-0'
 
 export default function ScheduleGrid({ lessons, getCellLesson, renderCell, onCellClick, editable, weekStart }) {
-  const timeSlots = useMemo(() => deriveTimeSlots(lessons), [lessons])
+  const rows = useMemo(() => deriveScheduleRows(lessons), [lessons])
 
   return (
     <div className="overflow-x-auto rounded-box border border-base-300 bg-base-100 shadow-sm">
@@ -30,14 +30,24 @@ export default function ScheduleGrid({ lessons, getCellLesson, renderCell, onCel
           </div>
         ))}
 
-        {timeSlots.map((slot) => (
-          <Fragment key={slot}>
+        {rows.map(({ key, label, timeSlot }) => (
+          <Fragment key={key}>
             <div className="flex items-center gap-2 border-b border-r border-base-300 bg-base-200/20 p-3 text-xs font-medium text-base-content/50">
               <Icon name="clock" className="size-3.5 shrink-0 text-base-content/35" />
-              {slot}
+              <div className="flex flex-col">
+                {label ? (
+                  <span className="text-[11px] font-semibold text-base-content/70">{label}</span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-warning">
+                    <Icon name="alertTriangle" className="size-3 shrink-0" />
+                    Eski jadval
+                  </span>
+                )}
+                <span>{timeSlot}</span>
+              </div>
             </div>
             {DAYS.map((d) => {
-              const lesson = getCellLesson(d.key, slot)
+              const lesson = getCellLesson(d.key, timeSlot)
               const content = lesson ? (
                 renderCell(lesson)
               ) : editable ? (
@@ -51,7 +61,7 @@ export default function ScheduleGrid({ lessons, getCellLesson, renderCell, onCel
 
               if (!editable) {
                 return (
-                  <div key={`${d.key}-${slot}`} className={CELL_BASE}>
+                  <div key={`${d.key}-${key}`} className={CELL_BASE}>
                     {content}
                   </div>
                 )
@@ -59,9 +69,9 @@ export default function ScheduleGrid({ lessons, getCellLesson, renderCell, onCel
 
               return (
                 <button
-                  key={`${d.key}-${slot}`}
+                  key={`${d.key}-${key}`}
                   type="button"
-                  onClick={() => onCellClick(d.key, slot, lesson)}
+                  onClick={() => onCellClick(d.key, timeSlot, lesson)}
                   className={`${CELL_BASE} group flex w-full cursor-pointer items-center justify-center transition-colors hover:bg-base-200/60`}
                 >
                   {content}

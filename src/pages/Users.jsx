@@ -12,11 +12,19 @@ import FilterSelect from '../components/table/FilterSelect'
 import Pagination from '../components/table/Pagination'
 import RowActionButton from '../components/table/RowActionButton'
 import SearchInput from '../components/table/SearchInput'
-import { ROLE_LABELS, ROLES } from '../data/roles'
+import { ROLE_ICONS, ROLE_LABELS, ROLE_TONES, ROLES } from '../data/roles'
 import UserFormModal from '../features/users/UserFormModal'
 import { useTableQuery } from '../hooks/useTableQuery'
 
 const ROLE_OPTIONS = Object.values(ROLES)
+
+const TONE_STYLES = {
+  primary: { icon: 'bg-primary/12 text-primary', active: 'border-primary bg-primary/10' },
+  info: { icon: 'bg-info/15 text-info', active: 'border-info bg-info/10' },
+  secondary: { icon: 'bg-secondary/15 text-secondary', active: 'border-secondary bg-secondary/10' },
+  warning: { icon: 'bg-warning/15 text-[oklch(58%_0.17_80)]', active: 'border-warning bg-warning/10' },
+  success: { icon: 'bg-success/15 text-[oklch(48%_0.16_155)]', active: 'border-success bg-success/10' },
+}
 
 const filterUser = (user, query) =>
   user.fullName.toLowerCase().includes(query) ||
@@ -132,15 +140,34 @@ export default function Users() {
 
           {roleCounts.length > 0 && (
             <div className="flex flex-wrap gap-2 sm:justify-end">
-              {roleCounts.map((r) => (
-                <span
-                  key={r.role}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-base-300 bg-base-200/40 px-3 py-1.5 text-sm"
-                >
-                  <span className="font-bold text-primary">{r.count}</span>
-                  <span className="text-base-content/60">{r.label}</span>
-                </span>
-              ))}
+              {roleCounts.map((r) => {
+                const tone = TONE_STYLES[ROLE_TONES[r.role]] ?? TONE_STYLES.primary
+                const isActive = roleFilter === r.role
+                return (
+                  <button
+                    key={r.role}
+                    type="button"
+                    onClick={() => setRoleFilter((prev) => (prev === r.role ? 'all' : r.role))}
+                    title={`${r.label} bo'yicha filtrlash`}
+                    className={[
+                      'group flex items-center gap-2 rounded-xl border px-2.5 py-1.5 text-left transition-all duration-200',
+                      isActive
+                        ? `${tone.active} shadow-sm`
+                        : 'border-base-300 bg-base-100 hover:border-base-content/20 hover:bg-base-200/40',
+                    ].join(' ')}
+                  >
+                    <span
+                      className={`flex size-7 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-105 ${tone.icon}`}
+                    >
+                      <Icon name={ROLE_ICONS[r.role]} className="size-3.5" />
+                    </span>
+                    <span className="flex flex-col leading-tight">
+                      <span className="text-sm font-bold text-base-content">{r.count}</span>
+                      <span className="text-[11px] text-base-content/55">{r.label}</span>
+                    </span>
+                  </button>
+                )
+              })}
             </div>
           )}
         </div>

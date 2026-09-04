@@ -1,4 +1,4 @@
-import { DAYS, TIME_SLOTS } from '../data/mockSchedule'
+import { DAYS, SCHEDULE_ROWS } from '../data/mockSchedule'
 import { addDays, getMonday } from './date'
 
 const DAY_OFFSETS = Object.fromEntries(DAYS.map((d, i) => [d.key, i]))
@@ -57,15 +57,21 @@ export function findLastCompletedLesson(lessons, weekStart, now = new Date()) {
   return best
 }
 
-// Standart 6 ta vaqt oralig'i + haqiqiy ma'lumotlarda uchraydigan, ularga mos
-// kelmaydigan har qanday boshqa vaqt oralig'i (masalan 19:00-20:20) — shunda
-// hech qanday dars jadval to'ridan "yo'qolib qolmaydi".
-export function deriveTimeSlots(lessons) {
-  const set = new Set(TIME_SLOTS)
+// SCHEDULE_ROWS (smena+para bo'yicha qatorlar) + haqiqiy ma'lumotlarda
+// uchraydigan, ularga mos kelmaydigan har qanday boshqa vaqt oralig'i
+// (masalan eski jadvaldan qolgan dars) — shunda hech qanday dars jadval
+// to'ridan "yo'qolib qolmaydi", faqat "label"siz alohida qator sifatida chiqadi.
+export function deriveScheduleRows(lessons) {
+  const knownSlots = new Set(SCHEDULE_ROWS.map((r) => r.timeSlot))
+  const legacySlots = new Set()
   for (const l of lessons) {
-    if (l.timeSlot) set.add(l.timeSlot)
+    if (l.timeSlot && !knownSlots.has(l.timeSlot)) legacySlots.add(l.timeSlot)
   }
-  return [...set].sort((a, b) => a.localeCompare(b))
+  const legacyRows = [...legacySlots].map((timeSlot) => ({ key: timeSlot, label: null, timeSlot }))
+
+  return [...SCHEDULE_ROWS, ...legacyRows].sort(
+    (a, b) => timeSlotToMinutes(a.timeSlot.split(' - ')[0]) - timeSlotToMinutes(b.timeSlot.split(' - ')[0]),
+  )
 }
 
 // Agar berilgan hafta joriy hafta bo'lsa va u haftaning bir kuniga to'g'ri kelsa,

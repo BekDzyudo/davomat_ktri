@@ -4,7 +4,6 @@ function mapSubjectFromApi(s) {
   return {
     id: s.id,
     name: s.name,
-    code: s.code,
     theoryHours: s.theory_hours ?? 0,
     practiceHours: s.practice_hours ?? 0,
     subjectType: s.subject_type ?? 'theory',
@@ -19,7 +18,6 @@ export async function listSubjects() {
 function subjectBody(input) {
   return {
     name: input.name,
-    code: input.code,
     theory_hours: input.theoryHours,
     practice_hours: input.practiceHours,
     subject_type: input.subjectType,

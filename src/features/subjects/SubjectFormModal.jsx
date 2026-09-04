@@ -14,7 +14,6 @@ const SUBJECT_TYPE_OPTIONS = [
 
 export default function SubjectFormModal({ open, mode, initialValue, onClose, onSubmit }) {
   const [name, setName] = useState(initialValue?.name ?? '')
-  const [code, setCode] = useState(initialValue?.code ?? '')
   const [theoryHours, setTheoryHours] = useState(initialValue?.theoryHours ?? 0)
   const [practiceHours, setPracticeHours] = useState(initialValue?.practiceHours ?? 0)
   const [subjectType, setSubjectType] = useState(initialValue?.subjectType ?? 'theory')
@@ -26,7 +25,6 @@ export default function SubjectFormModal({ open, mode, initialValue, onClose, on
     event.preventDefault()
     const nextErrors = {}
     if (!isRequired(name)) nextErrors.name = "Bu maydonni to'ldiring"
-    if (!isRequired(code)) nextErrors.code = "Bu maydonni to'ldiring"
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length > 0) return
 
@@ -36,7 +34,6 @@ export default function SubjectFormModal({ open, mode, initialValue, onClose, on
       await onSubmit({
         id: initialValue?.id,
         name: name.trim(),
-        code: code.trim().toUpperCase(),
         theoryHours: Number(theoryHours) || 0,
         practiceHours: Number(practiceHours) || 0,
         subjectType,
@@ -54,13 +51,6 @@ export default function SubjectFormModal({ open, mode, initialValue, onClose, on
     <Modal open={open} onClose={onClose} title={mode === 'edit' ? 'Modulni tahrirlash' : 'Yangi modul'}>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
         <Input label="Modul nomi" value={name} onChange={(e) => setName(e.target.value)} error={errors.name} />
-        <Input
-          label="Modul kodi"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          error={errors.code}
-          placeholder="CS101"
-        />
         <Select label="Turi" value={subjectType} onChange={setSubjectType} options={SUBJECT_TYPE_OPTIONS} />
         <div className="grid grid-cols-2 gap-4">
           <Input
