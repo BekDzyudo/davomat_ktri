@@ -6,6 +6,7 @@ import Select from '../../components/form/Select'
 import Icon from '../../components/Icon'
 import Modal from '../../components/Modal'
 import { DAYS, SCHEDULE_ROWS } from '../../data/mockSchedule'
+import { addDays, toIsoDate } from '../../utils/date'
 import { isRequired } from '../../utils/validators'
 
 function FieldLabel({ icon, children }) {
@@ -23,6 +24,7 @@ export default function LessonFormModal({
   defaultDay,
   defaultTimeSlot,
   defaultGroupId,
+  weekStart,
   lessons,
   groups,
   subjects,
@@ -93,6 +95,11 @@ export default function LessonFormModal({
     setConflicts([])
     setIsSubmitting(true)
     try {
+      // Dars aynan shu haftaning tanlangan kunidagi (weekStart + day) bitta
+      // sanasiga bog'lanadi — boshqa haftalarga avtomatik takrorlanmaydi.
+      const dayIndex = DAYS.findIndex((d) => d.key === day)
+      const date = weekStart && dayIndex >= 0 ? toIsoDate(addDays(weekStart, dayIndex)) : null
+
       await onSubmit({
         id: lesson?.id,
         groupId: Number(groupId),
@@ -101,6 +108,7 @@ export default function LessonFormModal({
         room: room.trim(),
         day,
         timeSlot,
+        date,
       })
     } catch (err) {
       setConflicts([err.message ?? "Saqlashda xatolik yuz berdi"])

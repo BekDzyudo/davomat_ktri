@@ -21,16 +21,20 @@ function currentAcademicYear() {
   return now.getMonth() >= 7 ? `${y}-${y + 1}` : `${y - 1}-${y}`
 }
 
+// `/api/schedule/` ro'yxati "subject"/"group"/"teacher"/"id" (xom FK) qaytaradi,
+// "/api/schedule/occurrences/" esa "subject_id"/"group_id"/"teacher_id"/"schedule_id"
+// (chunki occurrence Schedule'ning o'zi emas, undan hisoblangan natija) — ikkalasini
+// ham qo'llab-quvvatlash uchun fallback bilan o'qiymiz.
 function mapLessonFromApi(l) {
   return {
-    id: l.id,
+    id: l.id ?? l.schedule_id,
     day: KEY_BY_WEEKDAY[l.weekday] ?? 'mon',
     timeSlot: timesToSlot(l.start_time, l.end_time),
-    subjectId: l.subject,
+    subjectId: l.subject ?? l.subject_id,
     subjectName: l.subject_name,
-    teacherId: l.teacher,
+    teacherId: l.teacher ?? l.teacher_id,
     teacherName: l.teacher_name,
-    groupId: l.group,
+    groupId: l.group ?? l.group_id,
     groupName: l.group_name,
     room: l.room,
     semester: l.semester,
@@ -44,7 +48,10 @@ function lessonToApiBody(input) {
     subject: input.subjectId,
     group: input.groupId,
     teacher: input.teacherId,
-    weekday: WEEKDAY_BY_KEY[input.day],
+    // reference_date berilsa backend weekday'ni shundan hisoblaydi va darsni
+    // aynan shu bitta sanaga bog'laydi (valid_from=valid_until=reference_date)
+    // — haftama-hafta takrorlanmaydi.
+    ...(input.date ? { reference_date: input.date } : { weekday: WEEKDAY_BY_KEY[input.day] }),
     start_time,
     end_time,
     room: input.room,

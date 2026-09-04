@@ -107,9 +107,14 @@ export default function Schedule() {
 
     return (
       <div
-        className={`flex h-full flex-col gap-1.5 rounded-xl border-l-4 bg-base-100 p-2.5 shadow-sm ring-1 ring-base-300 ${accent.borderL}`}
+        className={`group/cell relative flex h-full flex-col gap-1.5 rounded-xl border-l-4 bg-base-100 p-2.5 shadow-sm ring-1 ring-base-300 ${accent.borderL}`}
       >
-        <p className="line-clamp-2 text-[13px] font-bold leading-tight text-base-content">
+        {canEdit && (
+          <span className="absolute right-1.5 top-1.5 flex size-5 items-center justify-center rounded-full bg-base-200/80 text-base-content/50 opacity-0 transition-opacity group-hover/cell:opacity-100">
+            <Icon name="pencil" className="size-3" />
+          </span>
+        )}
+        <p className="line-clamp-2 pr-4 text-[13px] font-bold leading-tight text-base-content">
           {lesson.subjectName}
         </p>
         <div className="flex items-center gap-1.5 text-[11px] leading-tight text-base-content/60">
@@ -125,9 +130,9 @@ export default function Schedule() {
     )
   }
 
-  const handleCellClick = (day, timeSlot, lesson) => {
+  const handleCellClick = (day, timeSlot, lesson, date) => {
     if (!canEdit || lesson?.cancelled) return
-    setModalState({ lesson, day, timeSlot })
+    setModalState({ lesson, day, timeSlot, date })
   }
 
   const handleSubmit = async (data) => {
@@ -225,6 +230,7 @@ export default function Schedule() {
           defaultDay={modalState.day}
           defaultTimeSlot={modalState.timeSlot}
           defaultGroupId={selectedGroupId}
+          weekStart={weekStart}
           lessons={lessons}
           groups={groups}
           subjects={subjects}

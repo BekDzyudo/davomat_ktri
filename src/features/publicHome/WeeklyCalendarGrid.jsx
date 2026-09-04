@@ -22,8 +22,8 @@ export default function WeeklyCalendarGrid({
         <div
           className="grid h-full min-w-225"
           style={{
-            gridTemplateColumns: `110px repeat(${DAYS.length}, minmax(150px, 1fr))`,
-            gridTemplateRows: `auto repeat(${rows.length}, minmax(3.25rem, 1fr))`,
+            gridTemplateColumns: `120px repeat(${DAYS.length}, minmax(190px, 1fr))`,
+            gridTemplateRows: `auto repeat(${rows.length}, minmax(5.5rem, auto))`,
           }}
         >
           <div className="border-b border-r border-base-300 bg-base-200 p-3" />
@@ -44,18 +44,18 @@ export default function WeeklyCalendarGrid({
 
           {rows.map(({ key, label, timeSlot }) => (
             <Fragment key={key}>
-              <div className="flex items-center gap-1.5 border-b border-r border-base-300 bg-base-200 p-2.5 text-[11px] font-semibold text-base-content/60 portrait:text-xs">
-                <Icon name="clock" className="size-3 shrink-0" />
+              <div className="flex items-center gap-2 border-b border-r border-base-300 bg-base-200 p-2.5 text-[13px] portrait:text-sm">
+                <Icon name="clock" className="size-4 shrink-0 text-base-content/40" />
                 <div className="flex flex-col leading-tight">
                   {label ? (
-                    <span className="text-base-content/80">{label}</span>
+                    <span className="font-bold text-base-content">{label}</span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-warning">
+                    <span className="inline-flex items-center gap-1 font-bold text-warning">
                       <Icon name="alertTriangle" className="size-2.5 shrink-0" />
                       Eski jadval
                     </span>
                   )}
-                  <span className="font-normal opacity-80">{timeSlot}</span>
+                  <span className="font-medium text-base-content/60">{timeSlot}</span>
                 </div>
               </div>
               {DAYS.map((d) => {
@@ -70,10 +70,10 @@ export default function WeeklyCalendarGrid({
                         return (
                           <div
                             key={lesson.id}
-                            title={lesson.note || 'Dars bekor qilingan'}
-                            className="flex w-full flex-col items-start gap-0.5 rounded-lg border border-dashed border-error/30 bg-error/5 px-2 py-1.5 text-left text-[11px] leading-tight text-error/60 line-through portrait:px-2.5 portrait:py-2 portrait:text-xs"
+                            title={lesson.note || lesson.subjectName || 'Dars bekor qilingan'}
+                            className="flex w-full flex-col items-start gap-0.5 rounded-lg border border-dashed border-error/30 bg-error/5 px-2.5 py-2 text-left text-[12px] leading-snug text-error/60 line-through portrait:px-2.5 portrait:py-2 portrait:text-xs"
                           >
-                            <span className="w-full truncate font-semibold">{lesson.subjectName}</span>
+                            <span className="line-clamp-2 w-full font-semibold">{lesson.subjectName}</span>
                             <span className="w-full truncate no-underline">Bekor qilingan</span>
                           </div>
                         )
@@ -95,20 +95,28 @@ export default function WeeklyCalendarGrid({
                           type="button"
                           disabled={!selectable}
                           onClick={() => onSelectLesson(lesson.id)}
-                          title={lesson.note || undefined}
+                          title={lesson.note || lesson.subjectName}
                           className={[
-                            'flex w-full flex-col items-start gap-0.5 rounded-lg border px-2 py-1.5 text-left text-[11px] leading-tight transition-all duration-150 portrait:px-2.5 portrait:py-2 portrait:text-xs',
+                            'flex w-full flex-col items-start gap-0.5 rounded-lg border px-3 py-2 text-left text-[12.5px] leading-snug transition-all duration-150 portrait:px-3.5 portrait:py-2.5 portrait:text-sm',
                             isSelected
                               ? `border-l-4 bg-primary text-primary-content shadow-sm ${accent.borderL}`
                               : stateClasses,
                           ].join(' ')}
                         >
-                          <span className="w-full truncate font-semibold">{lesson.subjectName}</span>
+                          <span className="line-clamp-2 w-full font-semibold">{lesson.subjectName}</span>
                           <span
-                            className={`w-full truncate ${isSelected ? 'opacity-85' : accent.text}`}
+                            className={`w-full truncate text-[11.5px] ${isSelected ? 'opacity-85' : accent.text}`}
                           >
                             {lesson.teacherName}
                           </span>
+                          {lesson.room && (
+                            <span
+                              className={`mt-auto flex w-full items-center gap-1 truncate pt-0.5 text-[10.5px] ${isSelected ? 'opacity-75' : 'text-base-content/45'}`}
+                            >
+                              <Icon name="mapPin" className="size-2.5 shrink-0" />
+                              <span className="truncate">{lesson.room}</span>
+                            </span>
+                          )}
                         </button>
                       )
                     })}

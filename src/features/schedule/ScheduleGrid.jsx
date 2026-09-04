@@ -46,7 +46,7 @@ export default function ScheduleGrid({ lessons, getCellLesson, renderCell, onCel
                 <span>{timeSlot}</span>
               </div>
             </div>
-            {DAYS.map((d) => {
+            {DAYS.map((d, i) => {
               const lesson = getCellLesson(d.key, timeSlot)
               const content = lesson ? (
                 renderCell(lesson)
@@ -71,7 +71,7 @@ export default function ScheduleGrid({ lessons, getCellLesson, renderCell, onCel
                 <button
                   key={`${d.key}-${key}`}
                   type="button"
-                  onClick={() => onCellClick(d.key, timeSlot, lesson)}
+                  onClick={() => onCellClick(d.key, timeSlot, lesson, addDays(weekStart, i))}
                   className={`${CELL_BASE} group flex w-full cursor-pointer items-center justify-center transition-colors hover:bg-base-200/60`}
                 >
                   {content}

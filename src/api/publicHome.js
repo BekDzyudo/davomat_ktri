@@ -11,7 +11,7 @@ function timesToSlot(startTime, endTime) {
 
 function mapLessonFromApi(l) {
   return {
-    id: l.id,
+    id: l.schedule_id,
     day: KEY_BY_WEEKDAY[l.weekday] ?? 'mon',
     timeSlot: timesToSlot(l.start_time, l.end_time),
     subjectName: l.subject_name,
