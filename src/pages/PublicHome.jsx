@@ -79,7 +79,7 @@ export default function PublicHome() {
     if (!selectedGroupId) return
     let cancelled = false
     const dateFrom = toIsoDate(weekStart)
-    const dateTo = toIsoDate(addDays(weekStart, 5))
+    const dateTo = toIsoDate(addDays(weekStart, 4))
     listPublicSchedule(selectedGroupId, dateFrom, dateTo)
       .then((data) => {
         if (cancelled) return

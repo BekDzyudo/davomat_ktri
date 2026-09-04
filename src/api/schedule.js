@@ -71,7 +71,8 @@ function mapOccurrenceFromApi(l) {
 // (bekor qilingan/o'zgartirilganlarini hisobga olib), takrorlanmasdan.
 export async function listScheduleOccurrences(dateFrom, dateTo) {
   const data = await apiFetch('/api/schedule/occurrences/', { params: { date_from: dateFrom, date_to: dateTo } })
-  return (Array.isArray(data) ? data : []).map(mapOccurrenceFromApi)
+  const raw = Array.isArray(data) ? data : (data?.results ?? [])
+  return raw.map(mapOccurrenceFromApi)
 }
 
 export async function createLesson(input) {

@@ -33,7 +33,8 @@ export async function listPublicSchedule(groupId, dateFrom, dateTo) {
     skipAuth: true,
     params: { group: groupId || undefined, date_from: dateFrom, date_to: dateTo },
   })
-  return (Array.isArray(data) ? data : []).map(mapLessonFromApi)
+  const raw = Array.isArray(data) ? data : (data?.results ?? [])
+  return raw.map(mapLessonFromApi)
 }
 
 export async function listPublicGroups() {

@@ -4,6 +4,13 @@ import Select from '../../components/form/Select'
 import Icon from '../../components/Icon'
 import Modal from '../../components/Modal'
 
+const LESSON_TYPE_OPTIONS = [
+  { value: 'theory', label: 'Nazariy' },
+  { value: 'practice', label: 'Amaliy' },
+  { value: 'mixed', label: 'Aralash' },
+]
+const LESSON_TYPE_LABELS = Object.fromEntries(LESSON_TYPE_OPTIONS.map((o) => [o.value, o.label]))
+
 export default function AssignSubjectModal({
   open,
   subject,
@@ -16,6 +23,7 @@ export default function AssignSubjectModal({
 }) {
   const [teacherId, setTeacherId] = useState('')
   const [groupId, setGroupId] = useState('')
+  const [lessonType, setLessonType] = useState('mixed')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [removingId, setRemovingId] = useState(null)
   const [error, setError] = useState('')
@@ -29,7 +37,7 @@ export default function AssignSubjectModal({
     setError('')
     setIsSubmitting(true)
     try {
-      await onAdd({ subjectId: subject.id, teacherId: Number(teacherId), groupId: Number(groupId) })
+      await onAdd({ subjectId: subject.id, teacherId: Number(teacherId), groupId: Number(groupId), lessonType })
       setTeacherId('')
       setGroupId('')
     } catch (err) {
@@ -64,6 +72,13 @@ export default function AssignSubjectModal({
               >
                 <span className="text-sm text-base-content">
                   {a.teacherName} <span className="text-base-content/40">·</span> {a.groupName}
+                  {a.lessonType && (
+                    <>
+                      {' '}
+                      <span className="text-base-content/40">·</span>{' '}
+                      <span className="text-base-content/60">{LESSON_TYPE_LABELS[a.lessonType] ?? a.lessonType}</span>
+                    </>
+                  )}
                 </span>
                 <button
                   type="button"
@@ -101,6 +116,7 @@ export default function AssignSubjectModal({
               ]}
             />
           </div>
+          <Select label="Dars turi" value={lessonType} onChange={setLessonType} options={LESSON_TYPE_OPTIONS} />
           {error && <p className="text-sm text-error">{error}</p>}
           <div className="flex justify-end gap-2">
             <Button type="button" variant="ghost" onClick={onClose}>

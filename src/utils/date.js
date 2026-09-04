@@ -29,14 +29,14 @@ export function addDays(date, days) {
 }
 
 export function formatWeekRange(monday) {
-  const saturday = addDays(monday, 5)
-  const year = saturday.getFullYear()
+  const friday = addDays(monday, 4)
+  const year = friday.getFullYear()
 
-  if (monday.getMonth() === saturday.getMonth()) {
-    return `${monday.getDate()}–${saturday.getDate()} ${UZ_MONTHS[saturday.getMonth()]}, ${year}`
+  if (monday.getMonth() === friday.getMonth()) {
+    return `${monday.getDate()}–${friday.getDate()} ${UZ_MONTHS[friday.getMonth()]}, ${year}`
   }
 
-  return `${monday.getDate()} ${UZ_MONTHS[monday.getMonth()]} – ${saturday.getDate()} ${UZ_MONTHS[saturday.getMonth()]}, ${year}`
+  return `${monday.getDate()} ${UZ_MONTHS[monday.getMonth()]} – ${friday.getDate()} ${UZ_MONTHS[friday.getMonth()]}, ${year}`
 }
 
 export function formatDateTime(date) {

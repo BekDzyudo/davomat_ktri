@@ -49,6 +49,7 @@ function mapAssignmentFromApi(a) {
     subjectName: a.subject_name,
     groupId: a.group,
     groupName: a.group_name,
+    lessonType: a.lesson_type,
   }
 }
 
@@ -57,10 +58,10 @@ export async function listAssignments() {
   return raw.map(mapAssignmentFromApi)
 }
 
-export async function createAssignment({ subjectId, teacherId, groupId }) {
+export async function createAssignment({ subjectId, teacherId, groupId, lessonType }) {
   const data = await apiFetch('/api/subjects/assignments/', {
     method: 'POST',
-    body: { subject: subjectId, teacher: teacherId, group: groupId },
+    body: { subject: subjectId, teacher: teacherId, group: groupId, lesson_type: lessonType },
   })
   return mapAssignmentFromApi(data)
 }

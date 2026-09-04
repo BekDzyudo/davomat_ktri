@@ -66,7 +66,7 @@ export default function Schedule() {
   // ketmaydi.
   const loadOccurrences = useCallback(() => {
     const dateFrom = toIsoDate(weekStart)
-    const dateTo = toIsoDate(addDays(weekStart, 5))
+    const dateTo = toIsoDate(addDays(weekStart, 4))
     return listScheduleOccurrences(dateFrom, dateTo).then(setOccurrences)
   }, [weekStart])
 

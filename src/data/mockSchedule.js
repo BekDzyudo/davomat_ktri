@@ -4,7 +4,6 @@ export const DAYS = [
   { key: 'wed', label: 'Chorshanba' },
   { key: 'thu', label: 'Payshanba' },
   { key: 'fri', label: 'Juma' },
-  { key: 'sat', label: 'Shanba' },
 ]
 
 // Dars davomiyligi 80 daqiqa. Har smenada faqat 1-4 oralig'ida para bo'ladi —
