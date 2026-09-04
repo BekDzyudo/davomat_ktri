@@ -84,7 +84,7 @@ export default function AssignSubjectModal({
                   type="button"
                   onClick={() => handleRemove(a.id)}
                   disabled={removingId === a.id}
-                  className="flex size-7 items-center justify-center rounded-lg text-base-content/40 transition-colors hover:bg-error/10 hover:text-error disabled:opacity-50"
+                  className="flex size-7 items-center justify-center rounded-lg text-base-content/60 transition-colors hover:bg-error/10 hover:text-error disabled:opacity-50"
                   aria-label="O'chirish"
                 >
                   <Icon name="trash" className="size-3.5" />

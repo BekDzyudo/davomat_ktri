@@ -78,6 +78,7 @@ export default function Groups() {
     <div>
       <PageHeader
         title="Guruhlar"
+        icon="group"
         actions={
           <Button onClick={() => setModalState({ mode: 'create' })}>
             <Icon
@@ -120,7 +121,6 @@ export default function Groups() {
                   <th className="w-10">#</th>
                   <th>Nomi</th>
                   <th>Yo'nalish</th>
-                  <th>Kurs</th>
                   <th>O'quv yili</th>
                   <th>Fakultet</th>
                   <th>Talabalar</th>
@@ -137,7 +137,6 @@ export default function Groups() {
                     <td className="text-base-content/40">{(page - 1) * pageSize + index + 1}</td>
                     <td className="font-medium text-base-content">{group.name}</td>
                     <td className="text-base-content/70">{group.direction}</td>
-                    <td className="text-base-content/70">{group.course}-kurs</td>
                     <td className="text-base-content/70">{group.academicYear}</td>
                     <td className="text-base-content/70">{facultyName(group.faculty)}</td>
                     <td className="text-base-content/70">{group.studentsCount ?? 0}</td>

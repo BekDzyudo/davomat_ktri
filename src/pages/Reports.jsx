@@ -3,6 +3,7 @@ import { listGroups } from '../api/groups'
 import { downloadBlob, exportExcel, exportPdf, getSummary } from '../api/reports'
 import Alert from '../components/form/Alert'
 import Button from '../components/form/Button'
+import GroupChipRow from '../components/GroupChipRow'
 import Icon from '../components/Icon'
 import PageHeader from '../components/PageHeader'
 import EmptyState from '../components/table/EmptyState'
@@ -10,6 +11,7 @@ import FilterSelect from '../components/table/FilterSelect'
 import Pagination from '../components/table/Pagination'
 import SearchInput from '../components/table/SearchInput'
 import { useTableQuery } from '../hooks/useTableQuery'
+import { usePersistedGroupId } from '../hooks/usePersistedGroupId'
 import { addDays } from '../utils/date'
 
 const RANGE_OPTIONS = [
@@ -30,7 +32,7 @@ const filterRow = (row, query) => row.fullName.toLowerCase().includes(query)
 
 export default function Reports() {
   const [groups, setGroups] = useState([])
-  const [groupId, setGroupId] = useState(null)
+  const [groupId, setGroupId, resolveGroupId] = usePersistedGroupId('reports')
   const [range, setRange] = useState('month')
   const [rows, setRows] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -44,7 +46,7 @@ export default function Reports() {
       .then((data) => {
         if (cancelled) return
         setGroups(data)
-        setGroupId((prev) => prev ?? data[0]?.id ?? null)
+        resolveGroupId(data)
       })
       .catch((err) => {
         if (!cancelled) setLoadError(err.message ?? "Ma'lumotlarni yuklab bo'lmadi")
@@ -52,7 +54,7 @@ export default function Reports() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [resolveGroupId])
 
   useEffect(() => {
     if (!groupId) return
@@ -109,6 +111,7 @@ export default function Reports() {
     <div>
       <PageHeader
         title="Hisobotlar"
+        icon="chart"
         actions={
           <div className="flex flex-wrap gap-2">
             <Button
@@ -133,6 +136,8 @@ export default function Reports() {
         }
       />
 
+      <GroupChipRow groups={groups} selectedGroupId={groupId} onChange={setGroupId} />
+
       {exportError && (
         <div className="mb-4">
           <Alert variant="error">{exportError}</Alert>
@@ -142,12 +147,6 @@ export default function Reports() {
       <div className="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm sm:p-6">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
           <SearchInput value={query} onChange={setQuery} placeholder="F.I.Sh bo'yicha qidirish" />
-          <FilterSelect
-            value={groupId ?? ''}
-            onChange={(v) => setGroupId(Number(v))}
-            className="w-full sm:w-48"
-            options={groups.map((g) => ({ value: g.id, label: g.name }))}
-          />
           <FilterSelect
             value={range}
             onChange={setRange}

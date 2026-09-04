@@ -4,7 +4,7 @@ import { DAYS } from '../../data/mockSchedule'
 import { addDays, formatDayMonth } from '../../utils/date'
 import { deriveScheduleRows } from '../../utils/publicSchedule'
 
-const CELL_BASE = 'min-h-24 border-b border-r border-base-300 p-1.5 text-left last:border-r-0'
+const CELL_BASE = 'min-h-24 border-b-2 border-r border-base-300 p-2 text-left last:border-r-0'
 
 export default function ScheduleGrid({ lessons, getCellLesson, renderCell, onCellClick, editable, weekStart }) {
   const rows = useMemo(() => deriveScheduleRows(lessons), [lessons])
@@ -32,8 +32,8 @@ export default function ScheduleGrid({ lessons, getCellLesson, renderCell, onCel
 
         {rows.map(({ key, label, timeSlot }) => (
           <Fragment key={key}>
-            <div className="flex items-center gap-2 border-b border-r border-base-300 bg-base-200/20 p-3 text-xs font-medium text-base-content/50">
-              <Icon name="clock" className="size-3.5 shrink-0 text-base-content/35" />
+            <div className="flex items-center gap-2 border-b-2 border-r border-base-300 bg-base-200/20 p-3 text-xs font-medium text-base-content/50">
+              <Icon name="clock" className="size-3.5 shrink-0 text-base-content/55" />
               <div className="flex flex-col">
                 {label ? (
                   <span className="text-[11px] font-semibold text-base-content/70">{label}</span>

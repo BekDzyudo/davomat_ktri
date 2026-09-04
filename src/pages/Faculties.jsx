@@ -70,6 +70,7 @@ export default function Faculties() {
     <div>
       <PageHeader
         title="Fakultetlar"
+        icon="building"
         actions={
           <Button onClick={() => setModalState({ mode: 'create' })}>
             <Icon

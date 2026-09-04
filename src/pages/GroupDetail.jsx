@@ -27,7 +27,7 @@ function BackLink() {
   return (
     <Link
       to="/groups"
-      className="group mb-2 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+      className="group mb-2 inline-flex items-center gap-1 text-sm font-medium text-white/90 hover:text-white hover:underline"
     >
       <Icon
         name="arrowLeft"
@@ -94,7 +94,7 @@ export default function GroupDetail() {
   if (loadError) {
     return (
       <div>
-        <PageHeader title="Guruh" back={<BackLink />} />
+        <PageHeader title="Guruh" icon="group" back={<BackLink />} />
         <Alert variant="error">{loadError}</Alert>
       </div>
     )
@@ -109,7 +109,7 @@ export default function GroupDetail() {
   }
 
   if (!group) {
-    return <PageHeader title="Guruh topilmadi" back={<BackLink />} />
+    return <PageHeader title="Guruh topilmadi" icon="group" back={<BackLink />} />
   }
 
   const handleAddStudent = async (data) => {
@@ -156,6 +156,7 @@ export default function GroupDetail() {
       <PageHeader
         title={group.name}
         description={`${group.direction} · ${group.course}-kurs · ${facultyName}`}
+        icon="group"
         back={<BackLink />}
         actions={
           <>

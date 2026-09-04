@@ -20,7 +20,7 @@ export default function Modal({ open, onClose, title, children, size = 'md' }) {
           <button
             type="button"
             onClick={onClose}
-            className="group flex size-8 items-center justify-center rounded-box text-base-content/50 transition-colors duration-200 hover:bg-error/10 hover:text-error"
+            className="group flex size-8 items-center justify-center rounded-box text-base-content/70 transition-colors duration-200 hover:bg-error/10 hover:text-error"
             aria-label="Yopish"
           >
             <Icon

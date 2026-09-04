@@ -57,7 +57,7 @@ export default function DekanDashboard({ data }) {
 
   if (groups.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-2 rounded-box border border-dashed border-base-300 bg-base-100 py-16 text-center text-base-content/50">
+      <div className="flex flex-col items-center gap-2 rounded-box border border-dashed border-base-300 bg-base-100 py-16 text-center text-base-content/70">
         <Icon name="group" className="size-8" />
         <p className="text-sm">Fakultetingizga tegishli guruhlar topilmadi</p>
       </div>
@@ -97,7 +97,7 @@ export default function DekanDashboard({ data }) {
                 <AttendanceRateBadge rate={rate} />
                 <Icon
                   name="chevronDown"
-                  className={`size-4 text-base-content/40 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                  className={`size-4 text-base-content/60 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
                 />
               </div>
             </button>

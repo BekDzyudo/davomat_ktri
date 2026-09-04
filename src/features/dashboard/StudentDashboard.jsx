@@ -30,7 +30,7 @@ export default function StudentDashboard({ data }) {
       <div className="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm sm:p-6">
         <h2 className="mb-3 text-sm font-semibold text-base-content">So'nggi davomat</h2>
         {recent.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-8 text-center text-base-content/50">
+          <div className="flex flex-col items-center gap-2 py-8 text-center text-base-content/70">
             <Icon name="calendar" className="size-8" />
             <p className="text-sm">Hali davomat yozuvi yo'q</p>
           </div>

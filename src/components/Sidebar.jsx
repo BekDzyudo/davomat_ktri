@@ -57,6 +57,18 @@ export default function Sidebar() {
             </li>
           ))}
         </ul>
+
+        <div className="relative mt-auto overflow-hidden rounded-2xl bg-linear-to-br from-[oklch(52%_0.20_290)] via-[oklch(52%_0.16_260)] to-[oklch(62%_0.14_190)] p-4 text-white">
+          <div className="pointer-events-none absolute -bottom-6 -right-4 size-20 rounded-full bg-white/10" />
+          <div className="pointer-events-none absolute -bottom-10 -right-10 size-24 rounded-full bg-white/10" />
+          <span className="relative flex size-9 items-center justify-center rounded-xl bg-white/20">
+            <Icon name="chart" className="size-4.5" />
+          </span>
+          <p className="relative mt-3 text-sm font-bold leading-tight">Ma'lumotlar doim siz bilan!</p>
+          <p className="relative mt-1 text-xs text-white/75">
+            Davomat statistikasi real vaqt rejimida yangilanadi.
+          </p>
+        </div>
       </aside>
     </div>
   )

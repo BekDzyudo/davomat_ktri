@@ -54,7 +54,7 @@ const paths = {
     'M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2ZM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z',
 }
 
-export default function Icon({ name, className = 'size-5', strokeWidth = 1.8 }) {
+export default function Icon({ name, className = 'size-5', strokeWidth = 2.25 }) {
   const d = paths[name]
   if (!d) return null
 

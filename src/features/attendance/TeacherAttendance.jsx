@@ -248,7 +248,7 @@ export default function TeacherAttendance() {
       )}
 
       {dayLessons.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-box border border-dashed border-base-300 bg-base-100 py-16 text-center text-base-content/50">
+        <div className="flex flex-col items-center gap-2 rounded-box border border-dashed border-base-300 bg-base-100 py-16 text-center text-base-content/70">
           <Icon name="calendar" className="size-8" />
           <p className="text-sm">Bu kunda darslaringiz yo'q</p>
         </div>

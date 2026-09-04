@@ -8,6 +8,7 @@ import AttendancePanel from '../features/publicHome/AttendancePanel'
 import WeeklyCalendarGrid from '../features/publicHome/WeeklyCalendarGrid'
 import WeekNavigator from '../features/schedule/WeekNavigator'
 import { useFullscreen } from '../hooks/useFullscreen'
+import { usePersistedGroupId } from '../hooks/usePersistedGroupId'
 import { getAccentColor } from '../utils/colors'
 import { addDays, getMonday, toIsoDate } from '../utils/date'
 import {
@@ -45,7 +46,7 @@ export default function PublicHome() {
 
   const [groups, setGroups] = useState([])
   const [groupsError, setGroupsError] = useState('')
-  const [selectedGroupId, setSelectedGroupId] = useState(null)
+  const [selectedGroupId, setSelectedGroupId, resolveGroupId] = usePersistedGroupId('publicHome')
 
   const [lessons, setLessons] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -65,7 +66,7 @@ export default function PublicHome() {
       .then((data) => {
         if (cancelled) return
         setGroups(data)
-        setSelectedGroupId((prev) => prev ?? data[0]?.id ?? null)
+        resolveGroupId(data)
       })
       .catch((err) => {
         if (!cancelled) setGroupsError(err.message ?? "Guruhlarni yuklab bo'lmadi")
@@ -73,7 +74,7 @@ export default function PublicHome() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [resolveGroupId])
 
   useEffect(() => {
     if (!selectedGroupId) return
@@ -205,10 +206,7 @@ export default function PublicHome() {
 
       <main className="mx-auto flex min-h-0 w-full max-w-[1600px] flex-1 flex-col p-4 sm:p-6 portrait:p-5">
         <div className="mb-3 shrink-0 portrait:mb-4">
-          <p className="text-sm font-semibold uppercase tracking-widest text-primary/70 portrait:text-base">
-            Xush kelibsiz
-          </p>
-          <h1 className="mt-1 text-2xl font-black text-base-content sm:text-3xl portrait:text-4xl">
+          <h1 className="text-2xl font-black text-base-content sm:text-3xl portrait:text-4xl">
             Dars jadvali va davomat monitoringi
           </h1>
         </div>
@@ -240,10 +238,6 @@ export default function PublicHome() {
           </div>
         )}
 
-        <div className="mb-4 shrink-0">
-          <WeekNavigator weekStart={weekStart} onChange={handleWeekChange} />
-        </div>
-
         {loadError ? (
           <div className="flex flex-1 items-center justify-center text-center text-sm text-error">
             {loadError}
@@ -254,16 +248,19 @@ export default function PublicHome() {
           </div>
         ) : (
           <div className="flex min-h-0 flex-1 flex-col gap-5 landscape:flex-row">
-            <div className="min-h-0 landscape:flex-2">
-              <WeeklyCalendarGrid
-                lessons={lessons}
-                lessonsFor={lessonsFor}
-                getTiming={(lesson) => getLessonTiming(lesson, weekStart, now)}
-                selectedLessonId={selectedLessonId}
-                onSelectLesson={setSelectedLessonId}
-                weekStart={weekStart}
-                todayKey={todayKey}
-              />
+            <div className="flex min-h-0 flex-col gap-4 landscape:flex-2">
+              <WeekNavigator weekStart={weekStart} onChange={handleWeekChange} />
+              <div className="min-h-0 flex-1">
+                <WeeklyCalendarGrid
+                  lessons={lessons}
+                  lessonsFor={lessonsFor}
+                  getTiming={(lesson) => getLessonTiming(lesson, weekStart, now)}
+                  selectedLessonId={selectedLessonId}
+                  onSelectLesson={setSelectedLessonId}
+                  weekStart={weekStart}
+                  todayKey={todayKey}
+                />
+              </div>
             </div>
 
             <div className="min-h-0 landscape:flex-1 landscape:max-w-md">

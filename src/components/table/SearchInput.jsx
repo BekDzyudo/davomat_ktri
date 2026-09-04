@@ -5,7 +5,7 @@ export default function SearchInput({ value, onChange, placeholder }) {
     <div className="group/search relative w-full sm:max-w-xs">
       <Icon
         name="search"
-        className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-base-content/35 transition-colors group-focus-within/search:text-primary"
+        className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-base-content/55 transition-colors group-focus-within/search:text-primary"
       />
       <input
         type="text"
@@ -18,7 +18,7 @@ export default function SearchInput({ value, onChange, placeholder }) {
         <button
           type="button"
           onClick={() => onChange('')}
-          className="group/clear absolute right-2.5 top-1/2 flex size-5 -translate-y-1/2 items-center justify-center rounded-full text-base-content/40 transition-colors duration-200 hover:bg-error/10 hover:text-error"
+          className="group/clear absolute right-2.5 top-1/2 flex size-5 -translate-y-1/2 items-center justify-center rounded-full text-base-content/60 transition-colors duration-200 hover:bg-error/10 hover:text-error"
           aria-label="Tozalash"
         >
           <Icon

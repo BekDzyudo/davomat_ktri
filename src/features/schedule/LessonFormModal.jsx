@@ -12,7 +12,7 @@ import { isRequired } from '../../utils/validators'
 function FieldLabel({ icon, children }) {
   return (
     <span className="inline-flex items-center gap-1.5">
-      <Icon name={icon} className="size-3.5 text-base-content/45" />
+      <Icon name={icon} className="size-3.5 text-base-content/65" />
       {children}
     </span>
   )

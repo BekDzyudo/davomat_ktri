@@ -64,7 +64,7 @@ export default function Dropdown({ id, value, onChange, options, placeholder = '
         </span>
         <Icon
           name="chevronDown"
-          className={`size-4 shrink-0 transition-all duration-200 group-hover:text-primary ${open ? 'rotate-180 text-primary' : 'text-base-content/40'}`}
+          className={`size-4 shrink-0 transition-all duration-200 group-hover:text-primary ${open ? 'rotate-180 text-primary' : 'text-base-content/60'}`}
         />
       </button>
 

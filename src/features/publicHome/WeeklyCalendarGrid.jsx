@@ -23,7 +23,7 @@ export default function WeeklyCalendarGrid({
           className="grid h-full min-w-225"
           style={{
             gridTemplateColumns: `120px repeat(${DAYS.length}, minmax(190px, 1fr))`,
-            gridTemplateRows: `auto repeat(${rows.length}, minmax(5.5rem, auto))`,
+            gridTemplateRows: `auto repeat(${rows.length}, minmax(6.5rem, auto))`,
           }}
         >
           <div className="border-b border-r border-base-300 bg-base-200 p-3" />
@@ -44,8 +44,8 @@ export default function WeeklyCalendarGrid({
 
           {rows.map(({ key, label, timeSlot }) => (
             <Fragment key={key}>
-              <div className="flex items-center gap-2 border-b border-r border-base-300 bg-base-200 p-2.5 text-[13px] portrait:text-sm">
-                <Icon name="clock" className="size-4 shrink-0 text-base-content/40" />
+              <div className="flex items-center gap-2 border-b-2 border-r border-base-300 bg-base-200 p-3 text-[13px] portrait:text-sm">
+                <Icon name="clock" className="size-4 shrink-0 text-base-content/60" />
                 <div className="flex flex-col leading-tight">
                   {label ? (
                     <span className="font-bold text-base-content">{label}</span>
@@ -63,7 +63,7 @@ export default function WeeklyCalendarGrid({
                 return (
                   <div
                     key={`${d.key}-${key}`}
-                    className="flex min-h-16 flex-col gap-1 border-b border-r border-base-300 p-1.5 last:border-r-0"
+                    className="flex min-h-20 flex-col gap-1.5 border-b-2 border-r border-base-300 p-2.5 last:border-r-0"
                   >
                     {cellLessons.map((lesson) => {
                       if (lesson.cancelled) {
@@ -111,7 +111,7 @@ export default function WeeklyCalendarGrid({
                           </span>
                           {lesson.room && (
                             <span
-                              className={`mt-auto flex w-full items-center gap-1 truncate pt-0.5 text-[10.5px] ${isSelected ? 'opacity-75' : 'text-base-content/45'}`}
+                              className={`mt-auto flex w-full items-center gap-1 truncate pt-0.5 text-[10.5px] ${isSelected ? 'opacity-75' : 'text-base-content/65'}`}
                             >
                               <Icon name="mapPin" className="size-2.5 shrink-0" />
                               <span className="truncate">{lesson.room}</span>

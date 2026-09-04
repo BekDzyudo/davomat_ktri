@@ -18,6 +18,7 @@ export default function Attendance() {
         <PageHeader
           title={t('pages.attendance.title')}
           description="Barcha guruhlar davomati — ko'rish va tahrirlash"
+          icon="check"
         />
         <AdminAttendance />
       </div>
@@ -27,7 +28,11 @@ export default function Attendance() {
   if (currentUser.role === ROLES.OQITUVCHI) {
     return (
       <div>
-        <PageHeader title={t('pages.attendance.title')} description="O'zingizga biriktirilgan darslar bo'yicha davomat" />
+        <PageHeader
+          title={t('pages.attendance.title')}
+          description="O'zingizga biriktirilgan darslar bo'yicha davomat"
+          icon="check"
+        />
         <TeacherAttendance />
       </div>
     )
@@ -36,11 +41,11 @@ export default function Attendance() {
   if (currentUser.role === ROLES.TALABA) {
     return (
       <div>
-        <PageHeader title={t('pages.attendance.title')} description="Sizning davomat tarixingiz" />
+        <PageHeader title={t('pages.attendance.title')} description="Sizning davomat tarixingiz" icon="check" />
         <StudentAttendance />
       </div>
     )
   }
 
-  return <PageHeader title={t('pages.attendance.title')} />
+  return <PageHeader title={t('pages.attendance.title')} icon="check" />
 }

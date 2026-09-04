@@ -4,9 +4,10 @@ import { listGroups } from '../../api/groups'
 import { listSchedule } from '../../api/schedule'
 import { listStudents } from '../../api/students'
 import Alert from '../../components/form/Alert'
+import GroupChipRow from '../../components/GroupChipRow'
 import Icon from '../../components/Icon'
-import FilterSelect from '../../components/table/FilterSelect'
 import { DAYS } from '../../data/mockSchedule'
+import { usePersistedGroupId } from '../../hooks/usePersistedGroupId'
 import { getLessonStart, getLessonTiming, getTodayDayKeyInWeek } from '../../utils/publicSchedule'
 import { getMonday, toIsoDate } from '../../utils/date'
 import DayTabs from '../publicHome/DayTabs'
@@ -22,7 +23,7 @@ export default function AdminAttendance() {
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
 
-  const [groupId, setGroupId] = useState(null)
+  const [groupId, setGroupId, resolveGroupId] = usePersistedGroupId('attendance')
   const [weekStart, setWeekStart] = useState(() => getMonday(new Date()))
   const [activeDay, setActiveDay] = useState(
     () => getTodayDayKeyInWeek(getMonday(new Date())) ?? DAYS[0].key,
@@ -43,7 +44,7 @@ export default function AdminAttendance() {
         setAllLessons(lessonsData)
         setGroups(groupsData)
         setStudents(studentsData)
-        setGroupId((prev) => prev ?? groupsData[0]?.id ?? null)
+        resolveGroupId(groupsData)
       })
       .catch((err) => {
         if (!cancelled) setLoadError(err.message ?? "Ma'lumotlarni yuklab bo'lmadi")
@@ -54,7 +55,7 @@ export default function AdminAttendance() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [resolveGroupId])
 
   const subjectName = (id) => allLessons.find((l) => l.subjectId === id)?.subjectName ?? '—'
   const groupName = (id) => allLessons.find((l) => l.groupId === id)?.groupName ?? '—'
@@ -180,12 +181,7 @@ export default function AdminAttendance() {
 
   return (
     <div className="flex flex-col gap-4">
-      <FilterSelect
-        value={groupId ?? ''}
-        onChange={(v) => handleGroupChange(Number(v))}
-        className="w-full sm:w-56"
-        options={groups.map((g) => ({ value: g.id, label: g.name }))}
-      />
+      <GroupChipRow groups={groups} selectedGroupId={groupId} onChange={handleGroupChange} />
 
       <WeekNavigator weekStart={weekStart} onChange={handleWeekChange} />
 
@@ -200,7 +196,7 @@ export default function AdminAttendance() {
       {saveError && <Alert variant="error">{saveError}</Alert>}
 
       {dayLessons.length === 0 ? (
-        <div className="flex min-h-48 flex-col items-center justify-center gap-2 rounded-box border border-dashed border-base-300 bg-base-100 p-8 text-center text-base-content/40">
+        <div className="flex min-h-48 flex-col items-center justify-center gap-2 rounded-box border border-dashed border-base-300 bg-base-100 p-8 text-center text-base-content/60">
           <Icon name="calendar" className="size-8" />
           <p className="text-sm">Bu kunda darslar rejalashtirilmagan</p>
         </div>

@@ -31,7 +31,7 @@ export default function LessonCard({
       ].join(' ')}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="flex items-center gap-1.5 text-xs font-semibold text-base-content/50 portrait:text-sm">
+        <span className="flex items-center gap-1.5 text-xs font-semibold text-base-content/70 portrait:text-sm">
           <Icon name="clock" className="size-3.5 shrink-0" />
           {lesson.timeSlot}
         </span>

@@ -5,6 +5,7 @@ import { listSubjects } from '../api/subjects'
 import { listUsers } from '../api/users'
 import ConfirmDialog from '../components/ConfirmDialog'
 import Alert from '../components/form/Alert'
+import GroupChipRow from '../components/GroupChipRow'
 import Icon from '../components/Icon'
 import PageHeader from '../components/PageHeader'
 import { useAuth } from '../context/useAuth'
@@ -14,6 +15,7 @@ import ScheduleGrid from '../features/schedule/ScheduleGrid'
 import WeekNavigator from '../features/schedule/WeekNavigator'
 import { getAccentColor } from '../utils/colors'
 import { addDays, getMonday, toIsoDate } from '../utils/date'
+import { usePersistedGroupId } from '../hooks/usePersistedGroupId'
 
 export default function Schedule() {
   const { currentUser } = useAuth()
@@ -24,7 +26,7 @@ export default function Schedule() {
   const [teachers, setTeachers] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
-  const [selectedGroupId, setSelectedGroupId] = useState(null)
+  const [selectedGroupId, setSelectedGroupId, resolveGroupId] = usePersistedGroupId('schedule')
   const [weekStart, setWeekStart] = useState(() => getMonday(new Date()))
   const [modalState, setModalState] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
@@ -47,7 +49,7 @@ export default function Schedule() {
         setGroups(groupsData)
         setSubjects(subjectsData)
         setTeachers(usersData.filter((u) => u.role === ROLES.OQITUVCHI))
-        setSelectedGroupId((prev) => prev ?? groupsData[0]?.id ?? null)
+        resolveGroupId(groupsData)
       })
       .catch((err) => {
         if (!cancelled) setLoadError(err.message ?? "Ma'lumotlarni yuklab bo'lmadi")
@@ -58,7 +60,7 @@ export default function Schedule() {
     return () => {
       cancelled = true
     }
-  }, [canEdit])
+  }, [canEdit, resolveGroupId])
 
   // Jadval to'ri haftaning haqiqiy sanalariga mos darslarni (bekor
   // qilingan/o'zgartirilganlarini hisobga olib) ko'rsatadi — shuning uchun
@@ -110,7 +112,7 @@ export default function Schedule() {
         className={`group/cell relative flex h-full flex-col gap-1.5 rounded-xl border-l-4 bg-base-100 p-2.5 shadow-sm ring-1 ring-base-300 ${accent.borderL}`}
       >
         {canEdit && (
-          <span className="absolute right-1.5 top-1.5 flex size-5 items-center justify-center rounded-full bg-base-200/80 text-base-content/50 opacity-0 transition-opacity group-hover/cell:opacity-100">
+          <span className="absolute right-1.5 top-1.5 flex size-5 items-center justify-center rounded-full bg-base-200/80 text-base-content/70 opacity-0 transition-opacity group-hover/cell:opacity-100">
             <Icon name="pencil" className="size-3" />
           </span>
         )}
@@ -168,7 +170,7 @@ export default function Schedule() {
   if (loadError) {
     return (
       <div>
-        <PageHeader title="Dars jadvali" />
+        <PageHeader title="Dars jadvali" icon="calendar" />
         <Alert variant="error">{loadError}</Alert>
       </div>
     )
@@ -184,26 +186,10 @@ export default function Schedule() {
 
   return (
     <div>
-      <PageHeader title="Dars jadvali" description={isTeacherView ? "O'zingizga biriktirilgan darslar" : undefined} />
+      <PageHeader title="Dars jadvali" icon="calendar" description={isTeacherView ? "O'zingizga biriktirilgan darslar" : undefined} />
 
       {!isTeacherView && (
-        <div className="mb-4 flex flex-wrap gap-2">
-          {groups.map((g) => (
-            <button
-              key={g.id}
-              type="button"
-              onClick={() => setSelectedGroupId(g.id)}
-              className={[
-                'rounded-box border px-4 py-2 text-sm font-medium transition-all duration-200',
-                g.id === selectedGroupId
-                  ? 'border-primary bg-primary text-primary-content shadow-sm'
-                  : 'border-base-300 bg-base-100 text-base-content/70 hover:border-primary/40 hover:text-primary',
-              ].join(' ')}
-            >
-              {g.name}
-            </button>
-          ))}
-        </div>
+        <GroupChipRow groups={groups} selectedGroupId={selectedGroupId} onChange={setSelectedGroupId} />
       )}
 
       {actionError && (

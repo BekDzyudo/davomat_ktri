@@ -9,7 +9,15 @@ const TONES = {
   secondary: { badge: 'bg-secondary/15 text-secondary', blob: 'bg-secondary' },
 }
 
-export default function StatCard({ icon, label, value, sublabel, tone = 'primary', tag }) {
+const TREND_TEXT_CLASS = {
+  up: 'text-success',
+  down: 'text-error',
+  flat: 'text-base-content/40',
+}
+
+const TREND_ARROW = { up: '↑', down: '↓', flat: '—' }
+
+export default function StatCard({ icon, label, value, sublabel, trend, tone = 'primary', tag }) {
   const t = TONES[tone] ?? TONES.primary
 
   return (
@@ -18,7 +26,7 @@ export default function StatCard({ icon, label, value, sublabel, tone = 'primary
         className={`pointer-events-none absolute -right-6 -top-6 size-24 rounded-full opacity-[0.08] transition-transform duration-300 group-hover:scale-110 ${t.blob}`}
       />
       <div className="relative mb-3 flex items-start justify-between gap-2">
-        <span className={`flex size-11 shrink-0 items-center justify-center rounded-2xl ${t.badge}`}>
+        <span className={`flex size-11 shrink-0 items-center justify-center rounded-full ${t.badge}`}>
           <Icon name={icon} className="size-5" />
         </span>
         {tag && (
@@ -29,7 +37,12 @@ export default function StatCard({ icon, label, value, sublabel, tone = 'primary
       </div>
       <p className="relative truncate text-sm font-medium text-base-content/60">{label}</p>
       <p className="relative mt-0.5 text-3xl font-black tracking-tight text-base-content">{value}</p>
-      {sublabel && <p className="relative mt-2 text-xs text-base-content/50">{sublabel}</p>}
+      {trend && (
+        <p className={`relative mt-2 truncate text-xs font-semibold ${TREND_TEXT_CLASS[trend.direction] ?? TREND_TEXT_CLASS.flat}`}>
+          {TREND_ARROW[trend.direction] ?? TREND_ARROW.flat} {trend.text}
+        </p>
+      )}
+      {!trend && sublabel && <p className="relative mt-2 text-xs text-base-content/50">{sublabel}</p>}
     </div>
   )
 }

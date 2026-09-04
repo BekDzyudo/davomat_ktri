@@ -43,7 +43,7 @@ export default function Input({
             type="button"
             onClick={() => setRevealed((v) => !v)}
             tabIndex={-1}
-            className="group absolute inset-y-0 right-0 flex w-11 items-center justify-center text-base-content/50 transition-colors duration-200 hover:text-primary"
+            className="group absolute inset-y-0 right-0 flex w-11 items-center justify-center text-base-content/70 transition-colors duration-200 hover:text-primary"
             aria-label={revealed ? 'Parolni yashirish' : "Parolni ko'rsatish"}
           >
             <Icon

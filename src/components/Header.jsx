@@ -17,22 +17,24 @@ export default function Header() {
   }
 
   return (
-    <header className="navbar sticky top-0 z-10 gap-2 border-b border-base-300 bg-base-100 px-4">
-      <div className="flex-none lg:hidden">
+    <header className="navbar sticky top-0 z-10 gap-2 overflow-hidden bg-fixed px-4 bg-[url(/bino.png)] bg-cover bg-position-[center_100%]">
+      <div className="pointer-events-none absolute inset-0 bg-linear-to-r from-[oklch(45%_0.18_231)]/85 via-[oklch(48%_0.14_210)]/45 to-[oklch(52%_0.14_190)]/85" />
+
+      <div className="relative flex-none lg:hidden">
         <label
           htmlFor="app-drawer"
-          className="group flex size-10 cursor-pointer items-center justify-center rounded-box text-base-content/60 transition-colors duration-200 hover:bg-base-200 hover:text-primary"
+          className="group flex size-10 cursor-pointer items-center justify-center rounded-box text-white/80 transition-colors duration-200 hover:bg-white/15 hover:text-white"
           aria-label="Menyu"
         >
           <Icon name="menu" className="size-5 transition-transform duration-200 group-hover:scale-110" />
         </label>
       </div>
 
-      <div className="flex-1" />
+      <div className="relative flex-1" />
 
       <Link
         to="/notifications"
-        className="group flex size-10 items-center justify-center rounded-box border border-base-300 bg-base-100 text-base-content/60 shadow-sm transition-colors duration-200 hover:border-primary/40 hover:bg-base-200 hover:text-primary"
+        className="group relative flex size-10 items-center justify-center rounded-box bg-white/10 text-white/90 backdrop-blur-sm transition-colors duration-200 hover:bg-white/20 hover:text-white"
         aria-label="Bildirishnomalar"
       >
         <Icon
@@ -44,7 +46,7 @@ export default function Header() {
       <button
         type="button"
         onClick={toggleTheme}
-        className="group flex size-10 items-center justify-center rounded-box border border-base-300 bg-base-100 text-base-content shadow-sm transition-colors duration-200 hover:border-primary/40 hover:bg-base-200 hover:text-primary"
+        className="group relative flex size-10 items-center justify-center rounded-box bg-white/10 text-white/90 backdrop-blur-sm transition-colors duration-200 hover:bg-white/20 hover:text-white"
         aria-label={t('header.toggleTheme')}
       >
         <Icon
@@ -55,14 +57,14 @@ export default function Header() {
 
       <Link
         to="/profile"
-        className="group flex items-center gap-2 rounded-box pl-2 transition-colors duration-200 hover:bg-base-200"
+        className="group relative flex items-center gap-2 rounded-box pl-2 transition-colors duration-200 hover:bg-white/10"
       >
         <div className="flex flex-col items-end leading-tight">
-          <span className="text-sm font-medium text-base-content">{currentUser?.fullName}</span>
-          <span className="text-xs text-base-content/60">{ROLE_LABELS[currentUser?.role]}</span>
+          <span className="text-sm font-medium text-white">{currentUser?.fullName}</span>
+          <span className="text-xs text-white/70">{ROLE_LABELS[currentUser?.role]}</span>
         </div>
         <div className="avatar avatar-placeholder">
-          <div className="w-9 overflow-hidden rounded-full bg-primary text-primary-content transition-transform duration-200 group-hover:scale-105">
+          <div className="w-9 overflow-hidden rounded-full bg-white/20 text-white ring-2 ring-white/40 transition-transform duration-200 group-hover:scale-105">
             {currentUser?.photo ? (
               <img src={currentUser.photo} alt={currentUser.fullName} className="h-full w-full object-cover" />
             ) : (
@@ -75,7 +77,7 @@ export default function Header() {
       <button
         type="button"
         onClick={handleLogout}
-        className="group flex size-10 items-center justify-center rounded-box text-base-content/60 transition-colors duration-200 hover:bg-error/10 hover:text-error"
+        className="group relative flex size-10 items-center justify-center rounded-box text-white/80 transition-colors duration-200 hover:bg-error/20 hover:text-white"
         aria-label={t('header.logout')}
       >
         <Icon

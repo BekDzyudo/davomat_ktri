@@ -165,7 +165,7 @@ export default function ExcelUploadModal({ open, onClose, onUpload }) {
           >
             <Icon
               name="fileSpreadsheet"
-              className="size-8 text-base-content/40 transition-all duration-200 group-hover:scale-110 group-hover:text-success"
+              className="size-8 text-base-content/60 transition-all duration-200 group-hover:scale-110 group-hover:text-success"
             />
             <span className="text-sm font-medium text-base-content">
               {file ? file.name : "Faylni shu yerga tashlang yoki tanlash uchun bosing"}

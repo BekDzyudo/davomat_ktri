@@ -39,7 +39,7 @@ export default function Dashboard() {
   if (loadError) {
     return (
       <div>
-        <PageHeader title={t('pages.dashboard.title')} />
+        <PageHeader title={t('pages.dashboard.title')} icon="home" />
         <Alert variant="error">{loadError}</Alert>
       </div>
     )
@@ -56,7 +56,11 @@ export default function Dashboard() {
   if (ADMIN_ROLES.includes(currentUser.role)) {
     return (
       <div>
-        <PageHeader title={t('pages.dashboard.title')} />
+        <PageHeader
+          title={t('pages.dashboard.title')}
+          description="Institutingiz davomat ko'rsatkichlari va umumiy statistikasi"
+          icon="home"
+        />
         <AdminDashboard data={data} />
       </div>
     )
@@ -65,7 +69,7 @@ export default function Dashboard() {
   if (currentUser.role === ROLES.OQITUVCHI) {
     return (
       <div>
-        <PageHeader title={t('pages.dashboard.title')} />
+        <PageHeader title={t('pages.dashboard.title')} icon="home" />
         <TeacherDashboard data={data} />
       </div>
     )
@@ -74,7 +78,7 @@ export default function Dashboard() {
   if (currentUser.role === ROLES.DEKAN) {
     return (
       <div>
-        <PageHeader title={t('pages.dashboard.title')} />
+        <PageHeader title={t('pages.dashboard.title')} icon="home" />
         <DekanDashboard data={data} />
       </div>
     )
@@ -83,11 +87,11 @@ export default function Dashboard() {
   if (currentUser.role === ROLES.TALABA) {
     return (
       <div>
-        <PageHeader title={t('pages.dashboard.title')} />
+        <PageHeader title={t('pages.dashboard.title')} icon="home" />
         <StudentDashboard data={data} />
       </div>
     )
   }
 
-  return <PageHeader title={t('pages.dashboard.title')} />
+  return <PageHeader title={t('pages.dashboard.title')} icon="home" />
 }

@@ -107,7 +107,7 @@ export default function Notifications() {
 
   return (
     <div>
-      <PageHeader title="Bildirishnomalar" />
+      <PageHeader title="Bildirishnomalar" icon="bell" />
 
       <div className="flex flex-col gap-4">
         <TelegramCard />

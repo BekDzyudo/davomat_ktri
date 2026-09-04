@@ -3,5 +3,5 @@ import PageHeader from '../components/PageHeader'
 
 export default function NotFound() {
   const { t } = useTranslation()
-  return <PageHeader title={t('pages.notFound.title')} />
+  return <PageHeader title={t('pages.notFound.title')} icon="alertTriangle" />
 }

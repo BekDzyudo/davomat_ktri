@@ -110,6 +110,7 @@ export default function Subjects() {
     <div>
       <PageHeader
         title="Modullar"
+        icon="book"
         actions={
           <Button onClick={() => setModalState({ mode: 'create' })}>
             <Icon

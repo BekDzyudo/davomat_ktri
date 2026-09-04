@@ -45,7 +45,7 @@ export default function ExcuseModal({ student, initialReason, initialFileName, o
         <label className="group flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-base-300 px-3 py-2.5 text-sm text-base-content/70 transition-colors duration-200 hover:border-primary/40 hover:bg-primary/5">
           <Icon
             name="upload"
-            className="size-4 shrink-0 text-base-content/40 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:text-primary"
+            className="size-4 shrink-0 text-base-content/60 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:text-primary"
           />
           <span className="truncate">{fileName || 'Spravka (fayl) biriktirish — ixtiyoriy'}</span>
           <input

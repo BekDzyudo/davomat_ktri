@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createUser, deleteUser, listUsers, updateUser } from '../api/users'
 import { ApiError } from '../api/client'
-import Badge from '../components/Badge'
 import ConfirmDialog from '../components/ConfirmDialog'
 import Alert from '../components/form/Alert'
 import Button from '../components/form/Button'
@@ -102,6 +101,7 @@ export default function Users() {
     <div>
       <PageHeader
         title="Foydalanuvchilar"
+        icon="users"
         actions={
           <Button onClick={() => setModalState({ mode: 'create' })}>
             <Icon
@@ -190,7 +190,6 @@ export default function Users() {
                   <th>Login</th>
                   <th>Rol</th>
                   <th>Telefon</th>
-                  <th>Holat</th>
                   <th className="text-right">Amallar</th>
                 </tr>
               </thead>
@@ -202,11 +201,6 @@ export default function Users() {
                     <td className="text-base-content/70">{user.username}</td>
                     <td className="text-base-content/70">{ROLE_LABELS[user.role]}</td>
                     <td className="text-base-content/70">{user.phone || '—'}</td>
-                    <td>
-                      <Badge status={user.isActive ? 'faol' : 'nofaol'}>
-                        {user.isActive ? 'Faol' : 'Nofaol'}
-                      </Badge>
-                    </td>
                     <td>
                       <div className="flex justify-end gap-1">
                         <RowActionButton

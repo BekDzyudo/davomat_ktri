@@ -235,7 +235,7 @@ function ChangePasswordCard() {
 export default function Profile() {
   return (
     <div>
-      <PageHeader title="Mening profilim" />
+      <PageHeader title="Mening profilim" icon="user" />
       <div className="flex flex-col gap-4">
         <ProfileCard />
         <ChangePasswordCard />

@@ -77,7 +77,7 @@ export default function StudentAttendance() {
 
   if (noProfile) {
     return (
-      <div className="flex flex-col items-center gap-2 rounded-box border border-dashed border-base-300 bg-base-100 py-16 text-center text-base-content/50">
+      <div className="flex flex-col items-center gap-2 rounded-box border border-dashed border-base-300 bg-base-100 py-16 text-center text-base-content/70">
         <Icon name="badgeCheck" className="size-8" />
         <p className="text-sm">Sizning tinglovchi profilingiz topilmadi</p>
       </div>

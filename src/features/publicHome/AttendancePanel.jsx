@@ -3,17 +3,24 @@ import { ATTENDANCE_STATUSES } from '../../data/attendanceStatuses'
 
 const STATUS_BY_KEY = Object.fromEntries(ATTENDANCE_STATUSES.map((s) => [s.key, s]))
 
-const BADGE_TONE = {
-  keldi: 'bg-success/10 text-success',
-  kelmadi: 'bg-error/10 text-error',
-  kech_qoldi: 'bg-warning/10 text-warning',
-  sababli: 'bg-info/10 text-info',
+const TEXT_TONE = {
+  keldi: 'text-[oklch(48%_0.16_155)]',
+  kelmadi: 'text-error',
+  kech_qoldi: 'text-[oklch(58%_0.17_80)]',
+  sababli: 'text-info',
+}
+
+const AVATAR_TONE = {
+  keldi: 'bg-success/15 text-success',
+  kelmadi: 'bg-error/15 text-error',
+  kech_qoldi: 'bg-warning/15 text-warning',
+  sababli: 'bg-info/15 text-info',
 }
 
 export default function AttendancePanel({ lesson, timing, attendance, isLoading }) {
   if (!lesson) {
     return (
-      <div className="flex h-full min-h-64 flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-base-300 bg-base-100 p-8 text-center text-base-content/50">
+      <div className="flex h-full min-h-64 flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-base-300 bg-base-100 p-8 text-center text-base-content/70">
         <Icon name="badgeCheck" className="size-10" />
         <p className="text-sm portrait:text-base">Hozircha tugagan dars yo'q</p>
       </div>
@@ -27,23 +34,46 @@ export default function AttendancePanel({ lesson, timing, attendance, isLoading 
       key={lesson.id}
       className="animate-fade-in-up flex h-full flex-col overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm"
     >
-      <div className="shrink-0 border-b border-base-300 bg-primary/10 p-5 portrait:p-6">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary portrait:text-sm">
+      <div className="relative shrink-0 overflow-hidden p-5 portrait:p-6">
+        <img
+          src="/bino.png"
+          alt=""
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-[oklch(52%_0.20_290)]/85 via-[oklch(52%_0.16_260)]/80 to-[oklch(62%_0.14_190)]/85" />
+
+        <span className="relative inline-flex items-center gap-1.5 rounded-full bg-white/15 py-1 pl-1 pr-3 text-xs font-black uppercase tracking-wide text-white backdrop-blur-sm portrait:text-sm">
+          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-white/90 text-[oklch(52%_0.20_290)]">
+            {timing === 'ongoing' ? (
+              <span className="relative flex size-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-75" />
+                <span className="relative inline-flex size-1.5 rounded-full bg-current" />
+              </span>
+            ) : (
+              <Icon name="badgeCheck" className="size-3" />
+            )}
+          </span>
           {timing === 'ongoing' ? 'Hozir davom etmoqda' : 'Yakunlangan dars'}
-        </p>
-        <h3 className="mt-1 truncate text-lg font-bold text-base-content portrait:text-2xl">
+        </span>
+
+        <h3 className="relative mt-3 text-lg font-bold leading-tight text-white portrait:text-2xl">
           {lesson.subjectName}
         </h3>
-        <p className="mt-1 truncate text-sm text-base-content/70 portrait:text-base">
+        <p className="relative mt-1 truncate text-sm text-white/80 portrait:text-base">
           {lesson.groupName} · {lesson.teacherName} · {lesson.room}
         </p>
+
         {!isLoading && (
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-base-content portrait:text-4xl">
-              {presentCount}
-              <span className="text-base font-medium text-base-content/50">/{attendance.length}</span>
+          <div className="relative mt-4 inline-flex items-center gap-2.5 rounded-2xl bg-white/15 p-3 backdrop-blur-sm">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white/20 text-white">
+              <Icon name="badgeCheck" className="size-4.5" />
             </span>
-            <span className="text-xs text-base-content/60 portrait:text-sm">tinglovchi keldi</span>
+            <div className="min-w-0 leading-tight">
+              <p className="truncate text-base font-black text-white">
+                {presentCount}/{attendance.length}
+              </p>
+              <p className="truncate text-[11px] text-white/70 portrait:text-xs">Davomat</p>
+            </div>
           </div>
         )}
       </div>
@@ -64,15 +94,19 @@ export default function AttendancePanel({ lesson, timing, attendance, isLoading 
               return (
                 <li
                   key={entry.id}
-                  className="flex items-center justify-between gap-2 rounded-xl bg-base-200 px-3 py-2 transition-colors hover:bg-base-300/60"
+                  className="flex items-center gap-2.5 rounded-xl bg-base-200 px-3 py-2 transition-colors hover:bg-base-300/60"
                 >
-                  <span className="truncate text-sm font-medium text-base-content portrait:text-base">
+                  <span
+                    className={`flex size-7 shrink-0 items-center justify-center rounded-full ${AVATAR_TONE[entry.status] ?? 'bg-base-300 text-base-content/70'}`}
+                  >
+                    <Icon name={statusInfo?.icon ?? 'user'} className="size-3.5" />
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium text-base-content portrait:text-base">
                     {entry.studentName}
                   </span>
                   <span
-                    className={`flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold portrait:text-xs ${BADGE_TONE[entry.status]}`}
+                    className={`shrink-0 text-xs font-bold portrait:text-sm ${TEXT_TONE[entry.status] ?? 'text-base-content/60'}`}
                   >
-                    {statusInfo && <Icon name={statusInfo.icon} className="size-3 shrink-0" />}
                     {entry.statusLabel ?? statusInfo?.label ?? entry.status}
                   </span>
                 </li>
