@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { listGroups } from '../api/groups'
-import { createLesson, deleteLesson, listSchedule, updateLesson } from '../api/schedule'
+import { createLesson, deleteLesson, listSchedule, listScheduleOccurrences, updateLesson } from '../api/schedule'
 import { listSubjects } from '../api/subjects'
 import { listUsers } from '../api/users'
 import ConfirmDialog from '../components/ConfirmDialog'
@@ -13,11 +13,12 @@ import LessonFormModal from '../features/schedule/LessonFormModal'
 import ScheduleGrid from '../features/schedule/ScheduleGrid'
 import WeekNavigator from '../features/schedule/WeekNavigator'
 import { getAccentColor } from '../utils/colors'
-import { getMonday } from '../utils/date'
+import { addDays, getMonday, toIsoDate } from '../utils/date'
 
 export default function Schedule() {
   const { currentUser } = useAuth()
   const [lessons, setLessons] = useState([])
+  const [occurrences, setOccurrences] = useState([])
   const [groups, setGroups] = useState([])
   const [subjects, setSubjects] = useState([])
   const [teachers, setTeachers] = useState([])
@@ -59,14 +60,48 @@ export default function Schedule() {
     }
   }, [canEdit])
 
-  const visibleLessons = isTeacherView
-    ? lessons.filter((l) => l.teacherId === currentUser.id)
-    : lessons.filter((l) => l.groupId === selectedGroupId)
+  // Jadval to'ri haftaning haqiqiy sanalariga mos darslarni (bekor
+  // qilingan/o'zgartirilganlarini hisobga olib) ko'rsatadi — shuning uchun
+  // hafta almashganda qayta so'raladi, oldingi haftadagi ma'lumot qolib
+  // ketmaydi.
+  const loadOccurrences = useCallback(() => {
+    const dateFrom = toIsoDate(weekStart)
+    const dateTo = toIsoDate(addDays(weekStart, 5))
+    return listScheduleOccurrences(dateFrom, dateTo).then(setOccurrences)
+  }, [weekStart])
+
+  useEffect(() => {
+    let cancelled = false
+    loadOccurrences().catch((err) => {
+      if (!cancelled) setLoadError(err.message ?? "Ma'lumotlarni yuklab bo'lmadi")
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [loadOccurrences])
+
+  const visibleOccurrences = isTeacherView
+    ? occurrences.filter((l) => l.teacherId === currentUser.id)
+    : occurrences.filter((l) => l.groupId === selectedGroupId)
 
   const getCellLesson = (day, timeSlot) =>
-    visibleLessons.find((l) => l.day === day && l.timeSlot === timeSlot) ?? null
+    visibleOccurrences.find((l) => l.day === day && l.timeSlot === timeSlot) ?? null
 
   const renderCell = (lesson) => {
+    if (lesson.cancelled) {
+      return (
+        <div
+          title={lesson.note || 'Dars bekor qilingan'}
+          className="flex h-full flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-error/30 bg-error/5 p-2.5 text-center"
+        >
+          <p className="line-clamp-2 text-[13px] font-bold leading-tight text-error/60 line-through">
+            {lesson.subjectName}
+          </p>
+          <span className="text-[10px] font-semibold text-error/60">Bekor qilingan</span>
+        </div>
+      )
+    }
+
     const personName = isTeacherView ? lesson.groupName : lesson.teacherName
     const accent = getAccentColor(personName)
 
@@ -91,7 +126,7 @@ export default function Schedule() {
   }
 
   const handleCellClick = (day, timeSlot, lesson) => {
-    if (!canEdit) return
+    if (!canEdit || lesson?.cancelled) return
     setModalState({ lesson, day, timeSlot })
   }
 
@@ -103,6 +138,7 @@ export default function Schedule() {
       const created = await createLesson(data)
       setLessons((prev) => [...prev, created])
     }
+    await loadOccurrences()
     setModalState(null)
   }
 
@@ -116,6 +152,7 @@ export default function Schedule() {
     try {
       await deleteLesson(deleteTarget.id)
       setLessons((prev) => prev.filter((l) => l.id !== deleteTarget.id))
+      await loadOccurrences()
       setDeleteTarget(null)
     } catch (err) {
       setActionError(err.message ?? "O'chirishda xatolik yuz berdi")
@@ -173,7 +210,7 @@ export default function Schedule() {
       <WeekNavigator weekStart={weekStart} onChange={setWeekStart} />
 
       <ScheduleGrid
-        lessons={visibleLessons}
+        lessons={visibleOccurrences}
         getCellLesson={getCellLesson}
         renderCell={renderCell}
         onCellClick={handleCellClick}

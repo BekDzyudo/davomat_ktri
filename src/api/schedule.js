@@ -58,6 +58,22 @@ export async function listSchedule() {
   return raw.map(mapLessonFromApi)
 }
 
+function mapOccurrenceFromApi(l) {
+  return {
+    ...mapLessonFromApi(l),
+    date: l.date ?? null,
+    cancelled: l.cancelled ?? false,
+    note: l.note ?? '',
+  }
+}
+
+// dateFrom/dateTo (YYYY-MM-DD) — shu haftaning haqiqiy sanalariga mos darslar
+// (bekor qilingan/o'zgartirilganlarini hisobga olib), takrorlanmasdan.
+export async function listScheduleOccurrences(dateFrom, dateTo) {
+  const data = await apiFetch('/api/schedule/occurrences/', { params: { date_from: dateFrom, date_to: dateTo } })
+  return (Array.isArray(data) ? data : []).map(mapOccurrenceFromApi)
+}
+
 export async function createLesson(input) {
   const data = await apiFetch('/api/schedule/', { method: 'POST', body: lessonToApiBody(input) })
   return mapLessonFromApi(data)

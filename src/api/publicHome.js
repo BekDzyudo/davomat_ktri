@@ -18,14 +18,20 @@ function mapLessonFromApi(l) {
     groupName: l.group_name,
     teacherName: l.teacher_name,
     room: l.room,
+    date: l.date ?? null,
+    cancelled: l.cancelled ?? false,
+    note: l.note ?? '',
   }
 }
 
 // Login talab qilmaydi — kiosk/bosh sahifa uchun.
-export async function listPublicSchedule(groupId) {
+// dateFrom/dateTo (YYYY-MM-DD) berilsa, backend shu haftaning haqiqiy
+// sanalariga mos darslarni (bekor qilingan/o'zgartirilganlarini hisobga olib)
+// qaytaradi; berilmasa eski (har hafta takrorlanuvchi shablon) xatti-harakat.
+export async function listPublicSchedule(groupId, dateFrom, dateTo) {
   const data = await apiFetch('/api/public/schedule/', {
     skipAuth: true,
-    params: groupId ? { group: groupId } : undefined,
+    params: { group: groupId || undefined, date_from: dateFrom, date_to: dateTo },
   })
   return (Array.isArray(data) ? data : []).map(mapLessonFromApi)
 }

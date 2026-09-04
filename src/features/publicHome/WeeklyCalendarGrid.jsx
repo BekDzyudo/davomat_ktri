@@ -66,6 +66,19 @@ export default function WeeklyCalendarGrid({
                     className="flex min-h-16 flex-col gap-1 border-b border-r border-base-300 p-1.5 last:border-r-0"
                   >
                     {cellLessons.map((lesson) => {
+                      if (lesson.cancelled) {
+                        return (
+                          <div
+                            key={lesson.id}
+                            title={lesson.note || 'Dars bekor qilingan'}
+                            className="flex w-full flex-col items-start gap-0.5 rounded-lg border border-dashed border-error/30 bg-error/5 px-2 py-1.5 text-left text-[11px] leading-tight text-error/60 line-through portrait:px-2.5 portrait:py-2 portrait:text-xs"
+                          >
+                            <span className="w-full truncate font-semibold">{lesson.subjectName}</span>
+                            <span className="w-full truncate no-underline">Bekor qilingan</span>
+                          </div>
+                        )
+                      }
+
                       const timing = getTiming(lesson)
                       const selectable = timing !== 'future'
                       const isSelected = lesson.id === selectedLessonId
@@ -82,6 +95,7 @@ export default function WeeklyCalendarGrid({
                           type="button"
                           disabled={!selectable}
                           onClick={() => onSelectLesson(lesson.id)}
+                          title={lesson.note || undefined}
                           className={[
                             'flex w-full flex-col items-start gap-0.5 rounded-lg border px-2 py-1.5 text-left text-[11px] leading-tight transition-all duration-150 portrait:px-2.5 portrait:py-2 portrait:text-xs',
                             isSelected

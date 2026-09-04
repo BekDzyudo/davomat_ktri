@@ -9,7 +9,7 @@ import WeeklyCalendarGrid from '../features/publicHome/WeeklyCalendarGrid'
 import WeekNavigator from '../features/schedule/WeekNavigator'
 import { useFullscreen } from '../hooks/useFullscreen'
 import { getAccentColor } from '../utils/colors'
-import { getMonday, toIsoDate } from '../utils/date'
+import { addDays, getMonday, toIsoDate } from '../utils/date'
 import {
   findLastCompletedLesson,
   getLessonStart,
@@ -78,11 +78,13 @@ export default function PublicHome() {
   useEffect(() => {
     if (!selectedGroupId) return
     let cancelled = false
-    listPublicSchedule(selectedGroupId)
+    const dateFrom = toIsoDate(weekStart)
+    const dateTo = toIsoDate(addDays(weekStart, 5))
+    listPublicSchedule(selectedGroupId, dateFrom, dateTo)
       .then((data) => {
         if (cancelled) return
         setLessons(data)
-        setSelectedLessonId(findLastCompletedLesson(data, getMonday(new Date()))?.id ?? null)
+        setSelectedLessonId(findLastCompletedLesson(data.filter((l) => !l.cancelled), weekStart)?.id ?? null)
       })
       .catch((err) => {
         if (!cancelled) setLoadError(err.message ?? "Ma'lumotlarni yuklab bo'lmadi")
@@ -93,13 +95,13 @@ export default function PublicHome() {
     return () => {
       cancelled = true
     }
-  }, [selectedGroupId])
+  }, [selectedGroupId, weekStart])
 
   const todayKey = getTodayDayKeyInWeek(weekStart, now)
 
   const handleWeekChange = (nextWeekStart) => {
     setWeekStart(nextWeekStart)
-    setSelectedLessonId(findLastCompletedLesson(lessons, nextWeekStart, now)?.id ?? null)
+    setIsLoading(true)
   }
 
   const handleGroupChange = (groupId) => {
@@ -124,7 +126,7 @@ export default function PublicHome() {
   useEffect(() => {
     if (!selectedLesson || selectedTiming === 'future') return
     let cancelled = false
-    const dateIso = toIsoDate(getLessonStart(weekStart, selectedLesson.day, selectedLesson.timeSlot))
+    const dateIso = selectedLesson.date ?? toIsoDate(getLessonStart(weekStart, selectedLesson.day, selectedLesson.timeSlot))
     getPublicAttendance(selectedLesson.id, dateIso)
       .then((data) => {
         if (!cancelled) setAttendance(data)
