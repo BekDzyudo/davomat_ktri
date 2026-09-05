@@ -19,6 +19,9 @@ const SHIFTS = [
 
 // Jadval qatorlari: bir xil vaqtga to'g'ri keladigan smena+para'lar (masalan
 // 1-4 va 2-1) bitta qatorga birlashtirilib, yorlig'i ikkalasini ham ko'rsatadi.
+// Har qatorga qaysi smena(lar)ga tegishli ekani ham yozib qo'yiladi (`shifts`)
+// — bosh ekranda (PublicHome) guruh faqat bitta smenada o'qisa, boshqa
+// smenaning o'ziga xos qatorlarini yashirish uchun ishlatiladi.
 const rowsByTimeSlot = new Map()
 for (const { shift, slots } of SHIFTS) {
   slots.forEach((timeSlot, i) => {
@@ -26,8 +29,9 @@ for (const { shift, slots } of SHIFTS) {
     const existing = rowsByTimeSlot.get(timeSlot)
     if (existing) {
       existing.label = `${existing.label} / ${label}`
+      existing.shifts.push(shift)
     } else {
-      rowsByTimeSlot.set(timeSlot, { key: timeSlot, label, timeSlot })
+      rowsByTimeSlot.set(timeSlot, { key: timeSlot, label, timeSlot, shifts: [shift] })
     }
   })
 }

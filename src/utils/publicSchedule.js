@@ -74,6 +74,30 @@ export function deriveScheduleRows(lessons) {
   )
 }
 
+// Guruh odatda faqat bitta smenada o'qiydi — shu haftadagi darslarga qarab qaysi
+// smena ekani aniqlanadi (ikkalasida ham dars bo'lsa yoki hali dars yo'q bo'lsa,
+// aniqlanmagan hisoblanadi). Faqat PublicHome (bosh ekran) uchun — Admin panelda
+// (ScheduleGrid) har doim ikkala smena ham to'liq ko'rinishi kerak, shuning uchun
+// u yerda `deriveScheduleRows` to'g'ridan-to'g'ri, filtrsiz ishlatiladi.
+function detectShifts(lessons) {
+  const shifts = new Set()
+  for (const l of lessons) {
+    const row = SCHEDULE_ROWS.find((r) => r.timeSlot === l.timeSlot)
+    // Ikkala smenaga ham tegishli umumiy qator (masalan 14:00-15:20) qaysi
+    // smenaga xosligini aniqlay olmaydi — faqat bitta smenaga xos qatordagi
+    // darslar "dalil" sifatida hisobga olinadi.
+    if (row?.shifts?.length === 1) shifts.add(row.shifts[0])
+  }
+  return shifts
+}
+
+export function filterRowsForGroupShift(rows, lessons) {
+  const shifts = detectShifts(lessons)
+  if (shifts.size !== 1) return rows
+  const [onlyShift] = shifts
+  return rows.filter((r) => !r.shifts || r.shifts.includes(onlyShift))
+}
+
 // Agar berilgan hafta joriy hafta bo'lsa va u haftaning bir kuniga to'g'ri kelsa,
 // bugungi kun kalitini qaytaradi (aks holda null).
 export function getTodayDayKeyInWeek(weekStart, now = new Date()) {

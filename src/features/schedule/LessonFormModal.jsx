@@ -6,7 +6,7 @@ import Select from '../../components/form/Select'
 import Icon from '../../components/Icon'
 import Modal from '../../components/Modal'
 import { DAYS, SCHEDULE_ROWS } from '../../data/mockSchedule'
-import { addCustomRoom, DEFAULT_ROOMS, loadCustomRooms } from '../../data/rooms'
+import { addCustomRoom, DEFAULT_ROOMS, isUnlimitedRoom, loadCustomRooms } from '../../data/rooms'
 import { addDays, toIsoDate } from '../../utils/date'
 import { isRequired } from '../../utils/validators'
 import SubjectFormModal from '../subjects/SubjectFormModal'
@@ -105,6 +105,19 @@ export default function LessonFormModal({
   const [scheduleRowKey, setScheduleRowKey] = useState(matchedRow?.key ?? initialTimeSlot)
   const timeSlot = rowOptions.find((r) => r.key === scheduleRowKey)?.timeSlot ?? initialTimeSlot
 
+  // Tanlangan kun/vaqtda boshqa dars tomonidan band qilingan xonalar — ular
+  // ro'yxatdan chiqarib tashlanadi (ZOOM kabi "cheksiz" xonalar bundan mustasno,
+  // joriy tanlangan xona esa har doim ko'rinib turadi).
+  const occupiedRooms = new Set(
+    lessons
+      .filter((l) => l.id !== lesson?.id && l.day === day && l.timeSlot === timeSlot)
+      .map((l) => l.room?.trim().toLowerCase())
+      .filter(Boolean),
+  )
+  const availableRooms = roomOptionsList.filter(
+    (r) => r === room || isUnlimitedRoom(r) || !occupiedRooms.has(r.trim().toLowerCase()),
+  )
+
   const [errors, setErrors] = useState({})
   const [conflicts, setConflicts] = useState([])
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -130,7 +143,7 @@ export default function LessonFormModal({
       nextConflicts.push(`Bu o'qituvchi shu vaqtda "${clashGroup?.name}" guruhida band`)
     }
 
-    const roomClash = otherLessons.find(
+    const roomClash = !isUnlimitedRoom(room) && otherLessons.find(
       (l) =>
         l.day === day &&
         l.timeSlot === timeSlot &&
@@ -277,7 +290,7 @@ export default function LessonFormModal({
             onCreateNew={() => setRoomModalOpen(true)}
             options={[
               { value: '', label: 'Tanlang' },
-              ...roomOptionsList.map((r) => ({ value: r, label: r })),
+              ...availableRooms.map((r) => ({ value: r, label: r })),
             ]}
           />
 

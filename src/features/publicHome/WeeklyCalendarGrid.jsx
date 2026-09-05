@@ -1,9 +1,18 @@
 import { Fragment, useMemo } from 'react'
 import Icon from '../../components/Icon'
 import { DAYS } from '../../data/mockSchedule'
-import { getAccentColor } from '../../utils/colors'
 import { addDays, formatDayMonth } from '../../utils/date'
-import { deriveScheduleRows } from '../../utils/publicSchedule'
+import { deriveScheduleRows, filterRowsForGroupShift } from '../../utils/publicSchedule'
+
+// Dars turiga qarab kartochkaning rangi — chap chegara, fon tinti va badge.
+// Nazariy/Amaliy/Aralash bir qarashda ajralib turishi uchun bosh ekranda
+// o'qituvchi bo'yicha (tasodifiy) rang o'rniga aynan shu ishlatiladi.
+const LESSON_TYPE_STYLES = {
+  theory: { border: 'border-l-info', tint: 'bg-info/6', chip: 'bg-info/15 text-info' },
+  practice: { border: 'border-l-success', tint: 'bg-success/6', chip: 'bg-success/15 text-success' },
+  mixed: { border: 'border-l-warning', tint: 'bg-warning/6', chip: 'bg-warning/15 text-[oklch(58%_0.17_80)]' },
+}
+const DEFAULT_TYPE_STYLE = { border: 'border-l-base-300', tint: '', chip: 'bg-base-300 text-base-content/60' }
 
 export default function WeeklyCalendarGrid({
   lessons,
@@ -14,7 +23,10 @@ export default function WeeklyCalendarGrid({
   weekStart,
   todayKey,
 }) {
-  const rows = useMemo(() => deriveScheduleRows(lessons), [lessons])
+  const rows = useMemo(
+    () => filterRowsForGroupShift(deriveScheduleRows(lessons), lessons),
+    [lessons],
+  )
 
   return (
     <div className="animate-fade-in-up flex h-full flex-col overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm">
@@ -23,7 +35,7 @@ export default function WeeklyCalendarGrid({
           className="grid h-full min-w-225"
           style={{
             gridTemplateColumns: `120px repeat(${DAYS.length}, minmax(190px, 1fr))`,
-            gridTemplateRows: `auto repeat(${rows.length}, minmax(6.5rem, auto))`,
+            gridTemplateRows: `auto repeat(${rows.length}, minmax(7.5rem, auto))`,
           }}
         >
           <div className="border-b border-r border-base-300 bg-base-200 p-3" />
@@ -63,7 +75,7 @@ export default function WeeklyCalendarGrid({
                 return (
                   <div
                     key={`${d.key}-${key}`}
-                    className="flex min-h-20 flex-col gap-1.5 border-b-2 border-r border-base-300 p-2.5 last:border-r-0"
+                    className="flex min-h-24 flex-col gap-2 border-b-2 border-r border-base-300 p-3 last:border-r-0"
                   >
                     {cellLessons.map((lesson) => {
                       if (lesson.cancelled) {
@@ -71,9 +83,9 @@ export default function WeeklyCalendarGrid({
                           <div
                             key={lesson.id}
                             title={lesson.note || lesson.subjectName || 'Dars bekor qilingan'}
-                            className="flex w-full flex-col items-start gap-0.5 rounded-lg border border-dashed border-error/30 bg-error/5 px-2.5 py-2 text-left text-[12px] leading-snug text-error/60 line-through portrait:px-2.5 portrait:py-2 portrait:text-xs"
+                            className="flex w-full flex-col items-start gap-0.5 rounded-2xl border border-dashed border-error/30 bg-error/5 px-3.5 py-3 text-left text-[13px] leading-snug text-error/60 line-through portrait:px-4 portrait:py-3.5 portrait:text-sm"
                           >
-                            <span className="line-clamp-2 w-full font-semibold">{lesson.subjectName}</span>
+                            <span className="line-clamp-2 w-full font-bold">{lesson.subjectName}</span>
                             <span className="w-full truncate no-underline">Bekor qilingan</span>
                           </div>
                         )
@@ -82,12 +94,13 @@ export default function WeeklyCalendarGrid({
                       const timing = getTiming(lesson)
                       const selectable = timing !== 'future'
                       const isSelected = lesson.id === selectedLessonId
-                      const accent = getAccentColor(lesson.teacherName)
+                      const typeStyle = LESSON_TYPE_STYLES[lesson.lessonType] ?? DEFAULT_TYPE_STYLE
 
-                      const stateClasses =
-                        timing === 'future'
-                          ? 'border-base-300 bg-base-200/60 text-base-content/40 cursor-default'
-                          : `border-l-4 bg-base-100 text-base-content hover:shadow-sm ${accent.borderL} border-y border-r border-base-300`
+                      const stateClasses = isSelected
+                        ? 'border-transparent bg-primary text-primary-content shadow-md border-y border-r'
+                        : timing === 'future'
+                          ? 'border-base-300 bg-base-200/50 text-base-content/40 cursor-default border-y border-r'
+                          : `border-base-300 ${typeStyle.tint} text-base-content shadow-sm hover:-translate-y-0.5 hover:shadow-md border-y border-r`
 
                       return (
                         <button
@@ -97,21 +110,32 @@ export default function WeeklyCalendarGrid({
                           onClick={() => onSelectLesson(lesson.id)}
                           title={lesson.note || lesson.subjectName}
                           className={[
-                            'flex w-full flex-col items-start gap-0.5 rounded-lg border px-3 py-2 text-left text-[12.5px] leading-snug transition-all duration-150 portrait:px-3.5 portrait:py-2.5 portrait:text-sm',
-                            isSelected
-                              ? `border-l-4 bg-primary text-primary-content shadow-sm ${accent.borderL}`
-                              : stateClasses,
+                            'flex w-full flex-col items-start gap-1 rounded-2xl border-l-4 px-3.5 py-3 text-left text-[13.5px] leading-snug transition-all duration-200 portrait:px-4 portrait:py-3.5 portrait:text-base',
+                            typeStyle.border,
+                            stateClasses,
                           ].join(' ')}
                         >
-                          <span className="line-clamp-2 w-full font-semibold">{lesson.subjectName}</span>
+                          <div className="flex w-full items-start justify-between gap-2">
+                            <span className="line-clamp-2 font-bold">{lesson.subjectName}</span>
+                            {lesson.lessonTypeDisplay && (
+                              <span
+                                className={[
+                                  'shrink-0 rounded-full px-2 py-0.5 text-[9.5px] font-bold tracking-wide uppercase',
+                                  isSelected ? 'bg-white/20 text-white' : typeStyle.chip,
+                                ].join(' ')}
+                              >
+                                {lesson.lessonTypeDisplay}
+                              </span>
+                            )}
+                          </div>
                           <span
-                            className={`w-full truncate text-[11.5px] ${isSelected ? 'opacity-85' : accent.text}`}
+                            className={`w-full truncate text-[12px] font-medium ${isSelected ? 'opacity-85' : 'text-base-content/55'}`}
                           >
                             {lesson.teacherName}
                           </span>
                           {lesson.room && (
                             <span
-                              className={`mt-auto flex w-full items-center gap-1 truncate pt-0.5 text-[10.5px] ${isSelected ? 'opacity-75' : 'text-base-content/65'}`}
+                              className={`mt-auto flex w-full items-center gap-1 truncate pt-0.5 text-[11px] ${isSelected ? 'opacity-75' : 'text-base-content/50'}`}
                             >
                               <Icon name="mapPin" className="size-2.5 shrink-0" />
                               <span className="truncate">{lesson.room}</span>

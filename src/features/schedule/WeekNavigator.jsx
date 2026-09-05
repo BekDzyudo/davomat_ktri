@@ -10,12 +10,12 @@ export default function WeekNavigator({ weekStart, onChange, className }) {
         <button
           type="button"
           onClick={() => onChange(addDays(weekStart, -7))}
-          className="group flex size-8 shrink-0 items-center justify-center rounded-lg text-base-content/60 transition-colors duration-200 hover:bg-primary/10 hover:text-primary"
+          className="group flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-primary/12 text-primary shadow-sm transition-all duration-200 hover:scale-105 hover:bg-primary hover:text-primary-content hover:shadow-md active:scale-95 portrait:size-12"
           aria-label="Oldingi hafta"
         >
           <Icon
             name="chevronLeft"
-            className="size-4 transition-transform duration-200 group-hover:-translate-x-0.5"
+            className="size-5 transition-transform duration-200 group-hover:-translate-x-0.5 portrait:size-6"
           />
         </button>
 
@@ -27,12 +27,12 @@ export default function WeekNavigator({ weekStart, onChange, className }) {
         <button
           type="button"
           onClick={() => onChange(addDays(weekStart, 7))}
-          className="group flex size-8 shrink-0 items-center justify-center rounded-lg text-base-content/60 transition-colors duration-200 hover:bg-primary/10 hover:text-primary"
+          className="group flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-primary/12 text-primary shadow-sm transition-all duration-200 hover:scale-105 hover:bg-primary hover:text-primary-content hover:shadow-md active:scale-95 portrait:size-12"
           aria-label="Keyingi hafta"
         >
           <Icon
             name="chevronRight"
-            className="size-4 transition-transform duration-200 group-hover:translate-x-0.5"
+            className="size-5 transition-transform duration-200 group-hover:translate-x-0.5 portrait:size-6"
           />
         </button>
       </div>

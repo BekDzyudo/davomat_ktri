@@ -17,6 +17,8 @@ function mapLessonFromApi(l) {
     subjectName: l.subject_name,
     groupName: l.group_name,
     teacherName: l.teacher_name,
+    lessonType: l.lesson_type,
+    lessonTypeDisplay: l.lesson_type_display,
     room: l.room,
     date: l.date ?? null,
     cancelled: l.cancelled ?? false,

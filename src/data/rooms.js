@@ -10,6 +10,16 @@ export const DEFAULT_ROOMS = [
   'ZOOM platformasi',
 ]
 
+// Bir vaqtning o'zida bir nechta guruh/darsga xizmat qila oladigan "xona"lar
+// (jismoniy joy emas, sig'imi cheksiz) — xona band-bo'shligini tekshirishda
+// bular hech qachon "band" hisoblanmaydi.
+const UNLIMITED_ROOMS = ['ZOOM platformasi']
+
+export function isUnlimitedRoom(name) {
+  const trimmed = name?.trim().toLowerCase()
+  return UNLIMITED_ROOMS.some((r) => r.toLowerCase() === trimmed)
+}
+
 const STORAGE_KEY = 'davomat_ktri.customRooms'
 
 // Foydalanuvchi qo'shgan qo'shimcha xonalar brauzer localStorage'ida
