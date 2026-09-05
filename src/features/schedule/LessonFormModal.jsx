@@ -6,6 +6,7 @@ import Select from '../../components/form/Select'
 import Icon from '../../components/Icon'
 import Modal from '../../components/Modal'
 import { DAYS, SCHEDULE_ROWS } from '../../data/mockSchedule'
+import { addCustomRoom, DEFAULT_ROOMS, loadCustomRooms } from '../../data/rooms'
 import { addDays, toIsoDate } from '../../utils/date'
 import { isRequired } from '../../utils/validators'
 import SubjectFormModal from '../subjects/SubjectFormModal'
@@ -22,6 +23,43 @@ function FieldLabel({ icon, children }) {
       <Icon name={icon} className="size-3.5 text-base-content/65" />
       {children}
     </span>
+  )
+}
+
+function NewRoomModal({ open, onClose, onSubmit }) {
+  const [name, setName] = useState('')
+  const [error, setError] = useState('')
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    if (!isRequired(name)) {
+      setError('Xona nomini kiriting')
+      return
+    }
+    onSubmit(name.trim())
+    setName('')
+    setError('')
+  }
+
+  return (
+    <Modal open={open} onClose={onClose} title="Yangi xona qo'shish" size="sm">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+        <Input
+          label="Xona nomi"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          error={error}
+          placeholder="Masalan: Yangi bino 1-xona"
+          autoFocus
+        />
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="ghost" onClick={onClose}>
+            Bekor qilish
+          </Button>
+          <Button type="submit">Qo'shish</Button>
+        </div>
+      </form>
+    </Modal>
   )
 }
 
@@ -48,6 +86,14 @@ export default function LessonFormModal({
   const [lessonType, setLessonType] = useState(lesson?.lessonType ?? 'mixed')
   const [day, setDay] = useState(lesson?.day ?? defaultDay ?? DAYS[0].key)
   const [subjectModalOpen, setSubjectModalOpen] = useState(false)
+  const [roomModalOpen, setRoomModalOpen] = useState(false)
+  // Tahrirlashda darsning joriy xonasi ro'yxatda bo'lmasligi mumkin (eski/erkin
+  // matn) — bunday holda ham ko'rinib turishi uchun ro'yxatga qo'shib qo'yamiz.
+  const [roomOptionsList, setRoomOptionsList] = useState(() => {
+    const all = [...DEFAULT_ROOMS, ...loadCustomRooms()]
+    if (room && !all.includes(room)) all.push(room)
+    return all
+  })
 
   const initialTimeSlot = lesson?.timeSlot ?? defaultTimeSlot ?? SCHEDULE_ROWS[0].timeSlot
   const matchedRow = SCHEDULE_ROWS.find((r) => r.timeSlot === initialTimeSlot)
@@ -135,6 +181,15 @@ export default function LessonFormModal({
     setSubjectModalOpen(false)
   }
 
+  // Yangi xona nomini ro'yxatga qo'shadi (localStorage'da saqlanadi, backendda
+  // alohida "Room" resursi yo'q) va uni darhol tanlaydi.
+  const handleCreateRoom = (name) => {
+    addCustomRoom(name)
+    setRoomOptionsList((prev) => (prev.includes(name) ? prev : [...prev, name]))
+    setRoom(name)
+    setRoomModalOpen(false)
+  }
+
   return (
     <>
       <Modal open={open} onClose={onClose} title={lesson ? 'Darsni tahrirlash' : "Dars qo'shish"}>
@@ -203,18 +258,27 @@ export default function LessonFormModal({
             value={teacherId}
             onChange={setTeacherId}
             error={errors.teacherId}
+            searchable
+            searchPlaceholder="O'qituvchini qidirish..."
             options={[
               { value: '', label: 'Tanlang' },
               ...teachers.map((t) => ({ value: t.id, label: t.fullName })),
             ]}
           />
 
-          <Input
+          <Select
             label={<FieldLabel icon="mapPin">Xona</FieldLabel>}
             value={room}
-            onChange={(e) => setRoom(e.target.value)}
+            onChange={setRoom}
             error={errors.room}
-            placeholder="204-xona"
+            searchable
+            searchPlaceholder="Xonani qidirish..."
+            createLabel="Yangi xona qo'shish"
+            onCreateNew={() => setRoomModalOpen(true)}
+            options={[
+              { value: '', label: 'Tanlang' },
+              ...roomOptionsList.map((r) => ({ value: r, label: r })),
+            ]}
           />
 
           <div className="mt-2 flex items-center justify-between gap-2">
@@ -243,6 +307,8 @@ export default function LessonFormModal({
         onClose={() => setSubjectModalOpen(false)}
         onSubmit={handleCreateSubject}
       />
+
+      <NewRoomModal open={roomModalOpen} onClose={() => setRoomModalOpen(false)} onSubmit={handleCreateRoom} />
     </>
   )
 }
