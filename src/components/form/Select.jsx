@@ -2,7 +2,20 @@ import { useId } from 'react'
 import Dropdown from '../Dropdown'
 import FormError from './FormError'
 
-export default function Select({ label, error, id, className = '', options, value, onChange, placeholder }) {
+export default function Select({
+  label,
+  error,
+  id,
+  className = '',
+  options,
+  value,
+  onChange,
+  placeholder,
+  searchable,
+  searchPlaceholder,
+  createLabel,
+  onCreateNew,
+}) {
   const generatedId = useId()
   const selectId = id ?? generatedId
 
@@ -19,6 +32,10 @@ export default function Select({ label, error, id, className = '', options, valu
         onChange={onChange}
         options={options}
         placeholder={placeholder}
+        searchable={searchable}
+        searchPlaceholder={searchPlaceholder}
+        createLabel={createLabel}
+        onCreateNew={onCreateNew}
         triggerClassName={[
           'flex w-full items-center justify-between gap-2 rounded-xl border bg-base-100 py-2.5 px-3.5 text-sm text-base-content shadow-sm outline-none transition-all',
           error

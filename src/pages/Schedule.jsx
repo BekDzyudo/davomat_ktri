@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { listGroups } from '../api/groups'
-import { createLesson, deleteLesson, listSchedule, listScheduleOccurrences, updateLesson } from '../api/schedule'
-import { listSubjects } from '../api/subjects'
+import { createLesson, deleteLesson, listScheduleOccurrences, updateLesson } from '../api/schedule'
+import { createSubject, listSubjects } from '../api/subjects'
 import { listUsers } from '../api/users'
 import ConfirmDialog from '../components/ConfirmDialog'
 import Alert from '../components/form/Alert'
@@ -19,7 +19,6 @@ import { usePersistedGroupId } from '../hooks/usePersistedGroupId'
 
 export default function Schedule() {
   const { currentUser } = useAuth()
-  const [lessons, setLessons] = useState([])
   const [occurrences, setOccurrences] = useState([])
   const [groups, setGroups] = useState([])
   const [subjects, setSubjects] = useState([])
@@ -38,14 +37,12 @@ export default function Schedule() {
   useEffect(() => {
     let cancelled = false
     Promise.all([
-      listSchedule(),
       listGroups().catch(() => []),
       canEdit ? listSubjects().catch(() => []) : Promise.resolve([]),
       canEdit ? listUsers().catch(() => []) : Promise.resolve([]),
     ])
-      .then(([lessonsData, groupsData, subjectsData, usersData]) => {
+      .then(([groupsData, subjectsData, usersData]) => {
         if (cancelled) return
-        setLessons(lessonsData)
         setGroups(groupsData)
         setSubjects(subjectsData)
         setTeachers(usersData.filter((u) => u.role === ROLES.OQITUVCHI))
@@ -122,6 +119,12 @@ export default function Schedule() {
         <div className="flex items-center gap-1.5 text-[11px] leading-tight text-base-content/60">
           <Icon name="mapPin" className="size-3 shrink-0" />
           <span className="truncate">{lesson.room}</span>
+          {lesson.lessonTypeDisplay && (
+            <>
+              <span className="text-base-content/30">·</span>
+              <span className="shrink-0">{lesson.lessonTypeDisplay}</span>
+            </>
+          )}
         </div>
         <span
           className={`mt-auto inline-flex w-fit max-w-full items-center truncate rounded-full px-2 py-1 text-[10px] font-bold ${accent.bg} ${accent.text}`}
@@ -139,14 +142,18 @@ export default function Schedule() {
 
   const handleSubmit = async (data) => {
     if (data.id) {
-      const updated = await updateLesson(data.id, data)
-      setLessons((prev) => prev.map((l) => (l.id === updated.id ? updated : l)))
+      await updateLesson(data.id, data)
     } else {
-      const created = await createLesson(data)
-      setLessons((prev) => [...prev, created])
+      await createLesson(data)
     }
     await loadOccurrences()
     setModalState(null)
+  }
+
+  const handleCreateSubject = async (data) => {
+    const created = await createSubject(data)
+    setSubjects((prev) => [...prev, created])
+    return created
   }
 
   const handleDeleteRequest = (lesson) => {
@@ -158,7 +165,6 @@ export default function Schedule() {
     setActionError('')
     try {
       await deleteLesson(deleteTarget.id)
-      setLessons((prev) => prev.filter((l) => l.id !== deleteTarget.id))
       await loadOccurrences()
       setDeleteTarget(null)
     } catch (err) {
@@ -217,13 +223,17 @@ export default function Schedule() {
           defaultTimeSlot={modalState.timeSlot}
           defaultGroupId={selectedGroupId}
           weekStart={weekStart}
-          lessons={lessons}
+          // To'qnashuv tekshiruvi uchun aynan shu haftaning haqiqiy sanalariga mos
+          // darslar beriladi (`lessons` emas — u butun semestr bo'ylab takrorlanuvchi
+          // shablon, sana/hafta farqini bilmaydi va yolg'on to'qnashuv ko'rsatib yuboradi).
+          lessons={occurrences.filter((o) => !o.cancelled)}
           groups={groups}
           subjects={subjects}
           teachers={teachers}
           onClose={() => setModalState(null)}
           onSubmit={handleSubmit}
           onDeleteRequest={handleDeleteRequest}
+          onCreateSubject={handleCreateSubject}
         />
       )}
 

@@ -8,6 +8,13 @@ import Modal from '../../components/Modal'
 import { DAYS, SCHEDULE_ROWS } from '../../data/mockSchedule'
 import { addDays, toIsoDate } from '../../utils/date'
 import { isRequired } from '../../utils/validators'
+import SubjectFormModal from '../subjects/SubjectFormModal'
+
+const LESSON_TYPE_OPTIONS = [
+  { value: 'theory', label: 'Nazariy' },
+  { value: 'practice', label: 'Amaliy' },
+  { value: 'mixed', label: 'Aralash' },
+]
 
 function FieldLabel({ icon, children }) {
   return (
@@ -32,12 +39,15 @@ export default function LessonFormModal({
   onClose,
   onSubmit,
   onDeleteRequest,
+  onCreateSubject,
 }) {
   const [groupId, setGroupId] = useState(lesson?.groupId ?? defaultGroupId ?? groups[0]?.id ?? '')
   const [subjectId, setSubjectId] = useState(lesson?.subjectId ?? '')
   const [teacherId, setTeacherId] = useState(lesson?.teacherId ?? '')
   const [room, setRoom] = useState(lesson?.room ?? '')
+  const [lessonType, setLessonType] = useState(lesson?.lessonType ?? 'mixed')
   const [day, setDay] = useState(lesson?.day ?? defaultDay ?? DAYS[0].key)
+  const [subjectModalOpen, setSubjectModalOpen] = useState(false)
 
   const initialTimeSlot = lesson?.timeSlot ?? defaultTimeSlot ?? SCHEDULE_ROWS[0].timeSlot
   const matchedRow = SCHEDULE_ROWS.find((r) => r.timeSlot === initialTimeSlot)
@@ -106,6 +116,7 @@ export default function LessonFormModal({
         subjectId: Number(subjectId),
         teacherId: Number(teacherId),
         room: room.trim(),
+        lessonType,
         day,
         timeSlot,
         date,
@@ -117,93 +128,121 @@ export default function LessonFormModal({
     }
   }
 
+  // Modaldan chiqmasdan turib yangi modul yaratish — yaratilgach avtomatik tanlanadi.
+  const handleCreateSubject = async (data) => {
+    const created = await onCreateSubject(data)
+    setSubjectId(String(created.id))
+    setSubjectModalOpen(false)
+  }
+
   return (
-    <Modal open={open} onClose={onClose} title={lesson ? 'Darsni tahrirlash' : "Dars qo'shish"}>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-        {conflicts.length > 0 && (
-          <Alert variant="error" icon="alertTriangle">
-            <ul className="list-disc space-y-0.5 pl-4">
-              {conflicts.map((c) => (
-                <li key={c}>{c}</li>
-              ))}
-            </ul>
-          </Alert>
-        )}
-
-        <div className="grid grid-cols-2 gap-4">
-          <Select
-            label={<FieldLabel icon="calendar">Kun</FieldLabel>}
-            value={day}
-            onChange={setDay}
-            options={DAYS.map((d) => ({ value: d.key, label: d.label }))}
-          />
-          <Select
-            label={<FieldLabel icon="clock">Vaqt</FieldLabel>}
-            value={scheduleRowKey}
-            onChange={setScheduleRowKey}
-            options={rowOptions.map((r) => ({
-              value: r.key,
-              label: r.label ? `${r.label} (${r.timeSlot})` : `Eski jadval (${r.timeSlot})`,
-            }))}
-          />
-        </div>
-
-        <Select
-          label={<FieldLabel icon="group">Guruh</FieldLabel>}
-          value={groupId}
-          onChange={setGroupId}
-          error={errors.groupId}
-          options={groups.map((g) => ({ value: g.id, label: g.name }))}
-        />
-
-        <Select
-          label={<FieldLabel icon="book">Modul</FieldLabel>}
-          value={subjectId}
-          onChange={setSubjectId}
-          error={errors.subjectId}
-          options={[
-            { value: '', label: 'Tanlang' },
-            ...subjects.map((s) => ({ value: s.id, label: s.name })),
-          ]}
-        />
-
-        <Select
-          label={<FieldLabel icon="user">O'qituvchi</FieldLabel>}
-          value={teacherId}
-          onChange={setTeacherId}
-          error={errors.teacherId}
-          options={[
-            { value: '', label: 'Tanlang' },
-            ...teachers.map((t) => ({ value: t.id, label: t.fullName })),
-          ]}
-        />
-
-        <Input
-          label={<FieldLabel icon="mapPin">Xona</FieldLabel>}
-          value={room}
-          onChange={(e) => setRoom(e.target.value)}
-          error={errors.room}
-          placeholder="204-xona"
-        />
-
-        <div className="mt-2 flex items-center justify-between gap-2">
-          {lesson ? (
-            <Button type="button" variant="danger" onClick={() => onDeleteRequest(lesson)} disabled={isSubmitting}>
-              O'chirish
-            </Button>
-          ) : (
-            <span />
+    <>
+      <Modal open={open} onClose={onClose} title={lesson ? 'Darsni tahrirlash' : "Dars qo'shish"}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+          {conflicts.length > 0 && (
+            <Alert variant="error" icon="alertTriangle">
+              <ul className="list-disc space-y-0.5 pl-4">
+                {conflicts.map((c) => (
+                  <li key={c}>{c}</li>
+                ))}
+              </ul>
+            </Alert>
           )}
-          <div className="flex gap-2">
-            <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>
-              Bekor qilish
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? <span className="loading loading-spinner loading-sm" /> : 'Saqlash'}
-            </Button>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Select
+              label={<FieldLabel icon="calendar">Kun</FieldLabel>}
+              value={day}
+              onChange={setDay}
+              options={DAYS.map((d) => ({ value: d.key, label: d.label }))}
+            />
+            <Select
+              label={<FieldLabel icon="clock">Vaqt</FieldLabel>}
+              value={scheduleRowKey}
+              onChange={setScheduleRowKey}
+              options={rowOptions.map((r) => ({
+                value: r.key,
+                label: r.label ? `${r.label} (${r.timeSlot})` : `Eski jadval (${r.timeSlot})`,
+              }))}
+            />
           </div>
-        </div>
-      </form>
-    </Modal>
+
+          <Select
+            label={<FieldLabel icon="group">Guruh</FieldLabel>}
+            value={groupId}
+            onChange={setGroupId}
+            error={errors.groupId}
+            options={groups.map((g) => ({ value: g.id, label: g.name }))}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <Select
+              label={<FieldLabel icon="book">Modul</FieldLabel>}
+              value={subjectId}
+              onChange={setSubjectId}
+              error={errors.subjectId}
+              searchable
+              searchPlaceholder="Modulni qidirish..."
+              createLabel="Yangi modul qo'shish"
+              onCreateNew={() => setSubjectModalOpen(true)}
+              options={[
+                { value: '', label: 'Tanlang' },
+                ...subjects.map((s) => ({ value: s.id, label: s.name })),
+              ]}
+            />
+            <Select
+              label={<FieldLabel icon="badgeCheck">Dars turi</FieldLabel>}
+              value={lessonType}
+              onChange={setLessonType}
+              options={LESSON_TYPE_OPTIONS}
+            />
+          </div>
+
+          <Select
+            label={<FieldLabel icon="user">O'qituvchi</FieldLabel>}
+            value={teacherId}
+            onChange={setTeacherId}
+            error={errors.teacherId}
+            options={[
+              { value: '', label: 'Tanlang' },
+              ...teachers.map((t) => ({ value: t.id, label: t.fullName })),
+            ]}
+          />
+
+          <Input
+            label={<FieldLabel icon="mapPin">Xona</FieldLabel>}
+            value={room}
+            onChange={(e) => setRoom(e.target.value)}
+            error={errors.room}
+            placeholder="204-xona"
+          />
+
+          <div className="mt-2 flex items-center justify-between gap-2">
+            {lesson ? (
+              <Button type="button" variant="danger" onClick={() => onDeleteRequest(lesson)} disabled={isSubmitting}>
+                O'chirish
+              </Button>
+            ) : (
+              <span />
+            )}
+            <div className="flex gap-2">
+              <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>
+                Bekor qilish
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? <span className="loading loading-spinner loading-sm" /> : 'Saqlash'}
+              </Button>
+            </div>
+          </div>
+        </form>
+      </Modal>
+
+      <SubjectFormModal
+        open={subjectModalOpen}
+        mode="create"
+        onClose={() => setSubjectModalOpen(false)}
+        onSubmit={handleCreateSubject}
+      />
+    </>
   )
 }
