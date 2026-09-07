@@ -144,14 +144,14 @@ export default function PublicHome() {
   }, [selectedLesson, selectedTiming, weekStart])
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-base-200">
+    <div className="flex min-h-screen flex-col bg-base-200">
       <div className="h-1.5 shrink-0 bg-linear-to-r from-primary via-secondary to-accent" />
       <header className="shrink-0 border-b border-base-300 bg-base-100 shadow-sm">
-        <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 py-3 sm:px-6 portrait:py-5">
+        <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:portrait:py-5">
           <div className="flex min-w-0 items-center gap-3">
-            <Logo className="h-9 w-9 shrink-0 portrait:h-12 portrait:w-12" />
+            <Logo className="h-9 w-9 shrink-0 sm:portrait:h-12 sm:portrait:w-12" />
             <div className="min-w-0">
-              <p className="truncate text-sm font-bold text-base-content portrait:text-lg">
+              <p className="truncate text-sm font-bold text-base-content sm:portrait:text-lg">
                 Kasbiy ta'limni rivojlantirish instituti
               </p>
               <p className="hidden text-xs text-base-content/50 sm:block">
@@ -162,7 +162,7 @@ export default function PublicHome() {
 
           <div className="flex shrink-0 items-center gap-2">
             <span
-              className="flex size-9 items-center justify-center rounded-full border border-success/30 bg-success/10 portrait:size-11"
+              className="flex size-9 items-center justify-center rounded-full border border-success/30 bg-success/10 sm:portrait:size-11"
               title="Jonli monitoring faol"
               aria-label="Jonli monitoring faol"
             >
@@ -177,36 +177,36 @@ export default function PublicHome() {
             <button
               type="button"
               onClick={toggleTheme}
-              className="group flex size-10 items-center justify-center rounded-box border border-base-300 bg-base-100 text-base-content/60 shadow-sm transition-colors duration-200 hover:border-primary/40 hover:bg-base-200 hover:text-primary portrait:size-12"
+              className="group flex size-10 items-center justify-center rounded-box border border-base-300 bg-base-100 text-base-content/60 shadow-sm transition-colors duration-200 hover:border-primary/40 hover:bg-base-200 hover:text-primary sm:portrait:size-12"
               aria-label={isDark ? "Yorug' rejim" : 'Tungi rejim'}
             >
               <Icon
                 name={isDark ? 'sun' : 'moon'}
-                className="size-5 transition-transform duration-300 group-hover:rotate-45 group-hover:scale-110 portrait:size-6"
+                className="size-5 transition-transform duration-300 group-hover:rotate-45 group-hover:scale-110 sm:portrait:size-6"
               />
             </button>
             <button
               type="button"
               onClick={toggle}
-              className="flex size-10 items-center justify-center rounded-box border border-base-300 bg-base-100 text-base-content/60 shadow-sm transition-colors duration-200 hover:border-primary/40 hover:bg-base-200 hover:text-primary portrait:size-12"
+              className="flex size-10 items-center justify-center rounded-box border border-base-300 bg-base-100 text-base-content/60 shadow-sm transition-colors duration-200 hover:border-primary/40 hover:bg-base-200 hover:text-primary sm:portrait:size-12"
               aria-label={isFullscreen ? "To'liq ekrandan chiqish" : "To'liq ekran"}
             >
-              <Icon name={isFullscreen ? 'minimize' : 'maximize'} className="size-5 portrait:size-6" />
+              <Icon name={isFullscreen ? 'minimize' : 'maximize'} className="size-5 sm:portrait:size-6" />
             </button>
             <Link
               to="/login"
-              className="flex items-center gap-2 rounded-box bg-linear-to-r from-primary to-secondary px-4 py-2.5 text-sm font-semibold text-primary-content shadow-sm transition-all duration-200 hover:shadow-lg hover:brightness-105 active:scale-95 portrait:px-5 portrait:py-3 portrait:text-base"
+              className="flex items-center gap-2 rounded-box bg-linear-to-r from-primary to-secondary px-4 py-2.5 text-sm font-semibold text-primary-content shadow-sm transition-all duration-200 hover:shadow-lg hover:brightness-105 active:scale-95 sm:portrait:px-5 sm:portrait:py-3 sm:portrait:text-base"
             >
-              <Icon name="login" className="size-4 portrait:size-5" />
+              <Icon name="login" className="size-4 sm:portrait:size-5" />
               Kirish
             </Link>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto flex min-h-0 w-full max-w-[1600px] flex-1 flex-col p-4 sm:p-6 portrait:p-5">
-        <div className="mb-3 shrink-0 portrait:mb-4">
-          <h1 className="text-2xl font-black text-base-content sm:text-3xl portrait:text-4xl">
+      <main className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col p-4 pb-8 sm:p-6 sm:portrait:p-5">
+        <div className="mb-3 shrink-0 sm:portrait:mb-4">
+          <h1 className="text-xl font-black text-base-content sm:text-3xl sm:portrait:text-4xl">
             Dars jadvali va davomat monitoringi
           </h1>
         </div>
@@ -224,7 +224,7 @@ export default function PublicHome() {
                   type="button"
                   onClick={() => handleGroupChange(g.id)}
                   className={[
-                    'flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-200 portrait:px-5 portrait:py-2.5 portrait:text-base',
+                    'flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all duration-200 sm:px-4 sm:py-2 sm:text-sm sm:portrait:px-5 sm:portrait:py-2.5 sm:portrait:text-base',
                     isSelected
                       ? `${accent.solid} border-transparent text-white shadow-sm`
                       : 'border-base-300 bg-base-100 text-base-content/70 hover:border-base-content/20',
@@ -239,18 +239,18 @@ export default function PublicHome() {
         )}
 
         {loadError ? (
-          <div className="flex flex-1 items-center justify-center text-center text-sm text-error">
+          <div className="flex min-h-64 items-center justify-center text-center text-sm text-error">
             {loadError}
           </div>
         ) : isLoading ? (
-          <div className="flex flex-1 items-center justify-center">
+          <div className="flex min-h-64 items-center justify-center">
             <span className="loading loading-spinner loading-lg text-primary" />
           </div>
         ) : (
-          <div className="flex min-h-0 flex-1 flex-col gap-5 landscape:flex-row">
-            <div className="flex min-h-0 flex-col gap-4 landscape:flex-2">
-              <WeekNavigator weekStart={weekStart} onChange={handleWeekChange} />
-              <div className="min-h-0 flex-1">
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+              <div className="flex min-w-0 flex-col gap-4 sm:flex-2">
+                <WeekNavigator weekStart={weekStart} onChange={handleWeekChange} />
                 <WeeklyCalendarGrid
                   lessons={lessons}
                   lessonsFor={lessonsFor}
@@ -261,15 +261,27 @@ export default function PublicHome() {
                   todayKey={todayKey}
                 />
               </div>
+
+              <div className="min-w-0 sm:max-w-md sm:flex-1">
+                <AttendancePanel
+                  lesson={selectedLesson}
+                  timing={selectedTiming}
+                  attendance={attendance}
+                  isLoading={attendanceLoading}
+                />
+              </div>
             </div>
 
-            <div className="min-h-0 landscape:flex-1 landscape:max-w-md">
-              <AttendancePanel
-                lesson={selectedLesson}
-                timing={selectedTiming}
-                attendance={attendance}
-                isLoading={attendanceLoading}
-              />
+            <div className="flex shrink-0 items-center gap-3 rounded-3xl bg-linear-to-r from-primary/10 via-secondary/10 to-accent/10 p-4 portrait:p-5">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-content shadow-sm portrait:size-12">
+                <Icon name="lightbulb" className="size-5 portrait:size-6" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-base-content portrait:text-base">Eslatma</p>
+                <p className="truncate text-xs text-base-content/60 portrait:text-sm">
+                  Darslarni o'z vaqtida boshlang va davomatni aniq monitoring qiling.
+                </p>
+              </div>
             </div>
           </div>
         )}

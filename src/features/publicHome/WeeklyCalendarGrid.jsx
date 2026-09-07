@@ -29,26 +29,26 @@ export default function WeeklyCalendarGrid({
   )
 
   return (
-    <div className="animate-fade-in-up flex h-full flex-col overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm">
-      <div className="flex-1 overflow-auto">
+    <div className="animate-fade-in-up overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm">
+      <div className="overflow-x-auto">
         <div
-          className="grid h-full min-w-225"
+          className="grid min-w-full"
           style={{
-            gridTemplateColumns: `120px repeat(${DAYS.length}, minmax(190px, 1fr))`,
+            gridTemplateColumns: `minmax(84px, 100px) repeat(${DAYS.length}, minmax(0, 1fr))`,
             gridTemplateRows: `auto repeat(${rows.length}, minmax(7.5rem, auto))`,
           }}
         >
-          <div className="border-b border-r border-base-300 bg-base-200 p-3" />
+          <div className="border-b border-r border-base-300 bg-base-200 p-1.5 lg:p-3" />
           {DAYS.map((d, i) => (
             <div
               key={d.key}
               className={[
-                'border-b border-r border-base-300 bg-base-200 p-3 text-center text-xs font-bold uppercase tracking-wide last:border-r-0 portrait:text-sm',
+                'border-b border-r border-base-300 bg-base-200 p-1.5 text-center text-[10px] font-bold uppercase tracking-wide last:border-r-0 lg:p-3 lg:text-sm',
                 d.key === todayKey ? 'bg-primary/15 text-primary' : 'text-base-content/70',
               ].join(' ')}
             >
               {d.label}
-              <span className="mt-0.5 block text-[10px] font-medium normal-case tracking-normal opacity-60">
+              <span className="mt-0.5 block text-[9px] font-medium normal-case tracking-normal opacity-60">
                 {formatDayMonth(addDays(weekStart, i))}
               </span>
             </div>
@@ -56,8 +56,8 @@ export default function WeeklyCalendarGrid({
 
           {rows.map(({ key, label, timeSlot }) => (
             <Fragment key={key}>
-              <div className="flex items-center gap-2 border-b-2 border-r border-base-300 bg-base-200 p-3 text-[13px] portrait:text-sm">
-                <Icon name="clock" className="size-4 shrink-0 text-base-content/60" />
+              <div className="flex items-center gap-1.5 border-b-2 border-r border-base-300 bg-base-200 p-1.5 text-[10px] lg:gap-2 lg:p-3 lg:text-[13px]">
+                <Icon name="clock" className="size-3 shrink-0 text-base-content/60 lg:size-4" />
                 <div className="flex flex-col leading-tight">
                   {label ? (
                     <span className="font-bold text-base-content">{label}</span>
@@ -75,7 +75,7 @@ export default function WeeklyCalendarGrid({
                 return (
                   <div
                     key={`${d.key}-${key}`}
-                    className="flex min-h-24 flex-col gap-2 border-b-2 border-r border-base-300 p-3 last:border-r-0"
+                    className="flex min-h-24 flex-col gap-1.5 border-b-2 border-r border-base-300 p-1.5 last:border-r-0 lg:gap-2 lg:p-3"
                   >
                     {cellLessons.map((lesson) => {
                       if (lesson.cancelled) {
@@ -83,7 +83,7 @@ export default function WeeklyCalendarGrid({
                           <div
                             key={lesson.id}
                             title={lesson.note || lesson.subjectName || 'Dars bekor qilingan'}
-                            className="flex w-full flex-col items-start gap-0.5 rounded-2xl border border-dashed border-error/30 bg-error/5 px-3.5 py-3 text-left text-[13px] leading-snug text-error/60 line-through portrait:px-4 portrait:py-3.5 portrait:text-sm"
+                            className="flex w-full flex-col items-start gap-0.5 rounded-2xl border border-dashed border-error/30 bg-error/5 px-2 py-1.5 text-left text-[10.5px] leading-snug text-error/60 line-through lg:px-3.5 lg:py-3 lg:text-sm"
                           >
                             <span className="line-clamp-2 w-full font-bold">{lesson.subjectName}</span>
                             <span className="w-full truncate no-underline">Bekor qilingan</span>
@@ -110,17 +110,17 @@ export default function WeeklyCalendarGrid({
                           onClick={() => onSelectLesson(lesson.id)}
                           title={lesson.note || lesson.subjectName}
                           className={[
-                            'flex w-full flex-col items-start gap-1 rounded-2xl border-l-4 px-3.5 py-3 text-left text-[13.5px] leading-snug transition-all duration-200 portrait:px-4 portrait:py-3.5 portrait:text-base',
+                            'flex w-full flex-col items-start gap-0.5 rounded-2xl border-l-4 px-2 py-1.5 text-left text-[10.5px] leading-snug transition-all duration-200 lg:gap-1 lg:px-3.5 lg:py-3 lg:text-base',
                             typeStyle.border,
                             stateClasses,
                           ].join(' ')}
                         >
-                          <div className="flex w-full items-start justify-between gap-2">
+                          <div className="flex w-full items-start justify-between gap-1 lg:gap-2">
                             <span className="line-clamp-2 font-bold">{lesson.subjectName}</span>
                             {lesson.lessonTypeDisplay && (
                               <span
                                 className={[
-                                  'shrink-0 rounded-full px-2 py-0.5 text-[9.5px] font-bold tracking-wide uppercase',
+                                  'shrink-0 rounded-full px-1.5 py-0.5 text-[8px] font-bold tracking-wide uppercase lg:px-2 lg:text-[9.5px]',
                                   isSelected ? 'bg-white/20 text-white' : typeStyle.chip,
                                 ].join(' ')}
                               >
@@ -129,13 +129,13 @@ export default function WeeklyCalendarGrid({
                             )}
                           </div>
                           <span
-                            className={`w-full truncate text-[12px] font-medium ${isSelected ? 'opacity-85' : 'text-base-content/55'}`}
+                            className={`w-full truncate text-[9.5px] font-medium lg:text-[12px] ${isSelected ? 'opacity-85' : 'text-base-content/55'}`}
                           >
                             {lesson.teacherName}
                           </span>
                           {lesson.room && (
                             <span
-                              className={`mt-auto flex w-full items-center gap-1 truncate pt-0.5 text-[11px] ${isSelected ? 'opacity-75' : 'text-base-content/50'}`}
+                              className={`mt-auto flex w-full items-center gap-1 truncate pt-0.5 text-[9px] lg:text-[11px] ${isSelected ? 'opacity-75' : 'text-base-content/50'}`}
                             >
                               <Icon name="mapPin" className="size-2.5 shrink-0" />
                               <span className="truncate">{lesson.room}</span>

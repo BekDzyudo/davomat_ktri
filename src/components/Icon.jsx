@@ -52,6 +52,8 @@ const paths = {
   send: 'M22 2 11 13M22 2l-7 20-4-9-9-4 20-7Z',
   camera:
     'M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2ZM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z',
+  lightbulb:
+    'M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.45 1 1.2 1 2.05V17h6v-.25c0-.85.4-1.6 1-2.05A7 7 0 0 0 12 2Z',
 }
 
 export default function Icon({ name, className = 'size-5', strokeWidth = 2.25 }) {
