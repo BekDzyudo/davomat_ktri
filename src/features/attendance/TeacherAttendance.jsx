@@ -8,17 +8,20 @@ import { useAuth } from '../../context/useAuth'
 import { DAYS } from '../../data/mockSchedule'
 import { formatRemaining, getEditability, getEditabilityDeadline } from '../../utils/attendanceTime'
 import { getMonday, toIsoDate } from '../../utils/date'
-import { getLessonStart, getTodayDayKeyInWeek } from '../../utils/publicSchedule'
+import { getLessonEnd, getLessonStart, getTodayDayKeyInWeek } from '../../utils/publicSchedule'
 import DayTabs from '../publicHome/DayTabs'
 import WeekNavigator from '../schedule/WeekNavigator'
 import ExcuseModal from './ExcuseModal'
 import LessonAttendanceEditor from './LessonAttendanceEditor'
 import LessonPicker from './LessonPicker'
 
+function formatTime(date) {
+  return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+}
+
 const BLOCK_MESSAGES = {
-  too_early: 'Belgilash darsdan 15 daqiqa oldin ochiladi.',
-  too_late: "Belgilash darsdan 1 soat o'tgach yopiladi — davomat belgilanmagan.",
-  edit_expired: 'Saqlangandan keyin 24 soat ichida tahrirlash mumkin edi — natija quyida ko\'rinadi.',
+  too_early: 'Belgilash dars boshlanishi bilan ochiladi.',
+  too_late: "Belgilash dars tugagandan 10 daqiqa o'tib yopiladi — natija (agar bo'lsa) quyida ko'rinadi.",
 }
 
 export default function TeacherAttendance() {
@@ -39,6 +42,7 @@ export default function TeacherAttendance() {
   const [pendingFiles, setPendingFiles] = useState({})
   const [excuseTarget, setExcuseTarget] = useState(null)
   const [savedBanner, setSavedBanner] = useState(false)
+  const [savedBannerDetails, setSavedBannerDetails] = useState('')
   const [saveError, setSaveError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [now, setNow] = useState(() => new Date())
@@ -109,8 +113,8 @@ export default function TeacherAttendance() {
   const defaultLessonId = useMemo(() => {
     const withState = dayLessons.map((l) => {
       const start = getLessonStart(weekStart, l.day, l.timeSlot)
-      const hasSaved = (recordsByLesson[l.id]?.length ?? 0) > 0
-      return { lesson: l, ...getEditability(start, hasSaved, now) }
+      const end = getLessonEnd(weekStart, l.day, l.timeSlot)
+      return { lesson: l, ...getEditability(start, end, now) }
     })
     const openOne = withState.find((s) => s.editable)
     const savedOne = withState.find((s) => (recordsByLesson[s.lesson.id]?.length ?? 0) > 0)
@@ -124,14 +128,19 @@ export default function TeacherAttendance() {
     : []
 
   const savedRecords = selectedLesson ? (recordsByLesson[selectedLesson.id] ?? []) : []
-  const hasSaved = savedRecords.length > 0
 
-  // Tanlangan dars almashganda `records`ni saqlangan qiymatlardan qayta
-  // tiklaydi — bu render vaqtida (effektsiz) amalga oshiriladi, chunki bu
-  // React'ning "propga bog'liq state'ni reset qilish" uchun tavsiya etgan
-  // usuli (ortiqcha effekt-render aylanishisiz).
+  // Tanlangan dars almashganda (yoki shu darsning saqlangan davomati hali
+  // yuklanmagan holatdan yuklangan holatga o'tganda) `records`ni saqlangan
+  // qiymatlardan qayta tiklaydi — bu render vaqtida (effektsiz) amalga
+  // oshiriladi, chunki bu React'ning "propga bog'liq state'ni reset qilish"
+  // uchun tavsiya etgan usuli (ortiqcha effekt-render aylanishisiz).
+  // "loaded"/"pending" holati alohida hisobga olinadi — aks holda sahifa
+  // yangilanganda tanlangan dars o'zgarmasa-yu, uning davomati keyinroq
+  // (asinxron) kelsa, `records` bo'sh holatda qolib ketardi (davomat 0/N
+  // bo'lib ko'rinardi, aslida saqlangan bo'lsa ham).
+  const isLoaded = selectedLesson ? Object.hasOwn(recordsByLesson, selectedLesson.id) : false
   const [syncedLessonKey, setSyncedLessonKey] = useState(null)
-  const lessonKey = selectedLesson ? String(selectedLesson.id) : null
+  const lessonKey = selectedLesson ? `${selectedLesson.id}:${isLoaded ? 'loaded' : 'pending'}` : null
   if (lessonKey !== syncedLessonKey) {
     setSyncedLessonKey(lessonKey)
     setRecords(Object.fromEntries(savedRecords.map((r) => [r.studentId, { status: r.status, reasonText: r.reasonText }])))
@@ -139,13 +148,14 @@ export default function TeacherAttendance() {
   }
 
   const lessonStart = selectedLesson ? getLessonStart(weekStart, selectedLesson.day, selectedLesson.timeSlot) : null
+  const lessonEnd = selectedLesson ? getLessonEnd(weekStart, selectedLesson.day, selectedLesson.timeSlot) : null
   const lessonDateIso = lessonStart ? toIsoDate(lessonStart) : null
   const { editable, reason: blockReason } = selectedLesson
-    ? getEditability(lessonStart, hasSaved, now)
+    ? getEditability(lessonStart, lessonEnd, now)
     : { editable: false, reason: null }
 
   const remainingMs =
-    editable && lessonStart ? getEditabilityDeadline(lessonStart, hasSaved).getTime() - now.getTime() : null
+    editable && lessonEnd ? getEditabilityDeadline(lessonEnd).getTime() - now.getTime() : null
 
   const setStudentRecord = (studentId, record) => {
     if (!selectedLesson) return
@@ -197,8 +207,16 @@ export default function TeacherAttendance() {
       setRecordsByLesson((prev) => ({ ...prev, [selectedLesson.id]: refreshed }))
       setRecords(Object.fromEntries(refreshed.map((r) => [r.studentId, { status: r.status, reasonText: r.reasonText }])))
       setPendingFiles({})
+      // Bildirishnomada belgilash oynasi qachon ochilgani/yopilishi va shu
+      // vaqtgacha tahrirlash mumkinligi ham ko'rsatiladi.
+      const deadline = lessonEnd ? getEditabilityDeadline(lessonEnd) : null
+      setSavedBannerDetails(
+        lessonStart && deadline
+          ? `Ochilish: ${formatTime(lessonStart)} · Yopilish: ${formatTime(deadline)} — shu vaqtgacha tahrirlash mumkin`
+          : '',
+      )
       setSavedBanner(true)
-      setTimeout(() => setSavedBanner(false), 4000)
+      setTimeout(() => setSavedBanner(false), 5000)
     } catch (err) {
       setSaveError(err.message ?? 'Saqlashda xatolik yuz berdi')
     } finally {
@@ -275,14 +293,14 @@ export default function TeacherAttendance() {
               editable={editable}
               blockTitle={
                 blockReason &&
-                (blockReason === 'edit_expired'
-                  ? 'Tahrirlash muddati tugagan.'
-                  : blockReason === 'too_late'
-                    ? 'Davomat belgilash vaqti tugagan.'
-                    : 'Davomat belgilash vaqti hali kelmagan.')
+                (blockReason === 'too_late'
+                  ? 'Davomat belgilash vaqti tugagan.'
+                  : 'Davomat belgilash vaqti hali kelmagan.')
               }
               blockMessage={BLOCK_MESSAGES[blockReason]}
               savedBanner={savedBanner}
+              savedDetails={savedBannerDetails}
+              onDismissSaved={() => setSavedBanner(false)}
               onStatusChange={handleStatusChange}
               onMarkAllPresent={handleMarkAllPresent}
               onSave={handleSave}

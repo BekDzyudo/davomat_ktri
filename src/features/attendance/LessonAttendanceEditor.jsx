@@ -1,3 +1,4 @@
+import CenterToast from '../../components/CenterToast'
 import Alert from '../../components/form/Alert'
 import Button from '../../components/form/Button'
 import Icon from '../../components/Icon'
@@ -14,6 +15,8 @@ export default function LessonAttendanceEditor({
   blockTitle,
   blockMessage,
   savedBanner,
+  savedDetails,
+  onDismissSaved,
   onStatusChange,
   onMarkAllPresent,
   onSave,
@@ -29,13 +32,12 @@ export default function LessonAttendanceEditor({
         </div>
       )}
 
-      {savedBanner && (
-        <div className="mb-4">
-          <Alert variant="success" icon="badgeCheck">
-            Davomat saqlandi. <strong>24 soat ichida</strong> tahrirlashingiz mumkin.
-          </Alert>
-        </div>
-      )}
+      <CenterToast
+        open={savedBanner}
+        message="Davomat saqlandi."
+        details={savedDetails}
+        onClose={onDismissSaved}
+      />
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-box border border-primary/15 bg-linear-to-r from-primary/10 via-primary/5 to-transparent p-4">
         <div className="flex min-w-0 items-center gap-3">

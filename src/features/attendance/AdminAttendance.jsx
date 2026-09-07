@@ -161,7 +161,7 @@ export default function AdminAttendance() {
       )
       setPendingFiles({})
       setSavedBanner(true)
-      setTimeout(() => setSavedBanner(false), 4000)
+      setTimeout(() => setSavedBanner(false), 5000)
     } catch (err) {
       setSaveError(err.message ?? "Saqlashda xatolik yuz berdi")
     } finally {
@@ -232,6 +232,7 @@ export default function AdminAttendance() {
           blockTitle={!editable ? 'Dars hali boshlanmagan.' : undefined}
           blockMessage="Davomatni dars boshlangandan keyin belgilash yoki tahrirlash mumkin."
           savedBanner={savedBanner}
+          onDismissSaved={() => setSavedBanner(false)}
           onStatusChange={handleStatusChange}
           onMarkAllPresent={handleMarkAllPresent}
           onSave={handleSave}
