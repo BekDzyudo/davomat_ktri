@@ -1,6 +1,6 @@
 import Icon from '../../components/Icon'
 import { getEditability } from '../../utils/attendanceTime'
-import { getLessonStart } from '../../utils/publicSchedule'
+import { getLessonEnd, getLessonStart } from '../../utils/publicSchedule'
 
 const BADGE_LABEL = {
   editable: 'Ochiq',
@@ -21,8 +21,9 @@ export default function LessonPicker({ lessons, selectedId, weekStart, onSelect,
     <div className="flex gap-3 overflow-x-auto pb-1">
       {lessons.map((lesson) => {
         const start = getLessonStart(weekStart, lesson.day, lesson.timeSlot)
+        const end = getLessonEnd(weekStart, lesson.day, lesson.timeSlot)
         const hasSaved = hasSavedFor(lesson.id)
-        const { editable, reason } = getEditability(start, hasSaved)
+        const { editable, reason } = getEditability(start, end)
         const state = editable ? 'editable' : hasSaved ? 'saved' : reason === 'too_early' ? 'future' : 'closed'
         const isSelected = lesson.id === selectedId
 

@@ -1,31 +1,24 @@
-export const MARK_WINDOW_BEFORE_MS = 15 * 60 * 1000
-export const MARK_WINDOW_AFTER_MS = 60 * 60 * 1000
-export const EDIT_WINDOW_MS = 24 * 60 * 60 * 1000
+export const MARK_WINDOW_BEFORE_MS = 0
+export const MARK_WINDOW_AFTER_MS = 10 * 60 * 1000
 
-// Dars boshlanishidan 15 daqiqa oldin ochiladi, 1 soatdan keyin yopiladi.
-// Bir marta saqlangandan so'ng, 24 soat ichida tahrirlash imkoni ochiq qoladi.
-// `lessonStart` — darsning haqiqiy boshlanish sanasi+vaqti (Date), masalan
-// utils/publicSchedule.js dagi getLessonStart(weekStart, day, timeSlot) orqali.
-export function getEditability(lessonStart, hasSaved, now = new Date()) {
-  if (!hasSaved) {
-    if (now.getTime() < lessonStart.getTime() - MARK_WINDOW_BEFORE_MS) {
-      return { editable: false, reason: 'too_early' }
-    }
-    if (now.getTime() > lessonStart.getTime() + MARK_WINDOW_AFTER_MS) {
-      return { editable: false, reason: 'too_late' }
-    }
-    return { editable: true, reason: null }
+// Belgilash (va tahrirlash) dars boshlanishi bilan (oldindan emas) ochiladi va
+// dars tugagandan 10 daqiqa o'tib yopiladi — allaqachon saqlangan bo'lsa ham
+// qo'shimcha muddat berilmaydi (backend `assert_can_edit` bilan bir xil qoida).
+// `lessonStart`/`lessonEnd` — darsning haqiqiy boshlanish/tugash sanasi+vaqti
+// (Date), masalan utils/publicSchedule.js dagi getLessonStart/getLessonEnd orqali.
+export function getEditability(lessonStart, lessonEnd, now = new Date()) {
+  if (now.getTime() < lessonStart.getTime() - MARK_WINDOW_BEFORE_MS) {
+    return { editable: false, reason: 'too_early' }
   }
-
-  if (now.getTime() - lessonStart.getTime() > EDIT_WINDOW_MS) {
-    return { editable: false, reason: 'edit_expired' }
+  if (now.getTime() > lessonEnd.getTime() + MARK_WINDOW_AFTER_MS) {
+    return { editable: false, reason: 'too_late' }
   }
   return { editable: true, reason: null }
 }
 
 // Belgilash/tahrirlash oynasi qachon yopilishini qaytaradi (Date).
-export function getEditabilityDeadline(lessonStart, hasSaved) {
-  return new Date(lessonStart.getTime() + (hasSaved ? EDIT_WINDOW_MS : MARK_WINDOW_AFTER_MS))
+export function getEditabilityDeadline(lessonEnd) {
+  return new Date(lessonEnd.getTime() + MARK_WINDOW_AFTER_MS)
 }
 
 // Qolgan vaqtni "H:MM:SS" yoki "MM:SS" ko'rinishida formatlaydi.
