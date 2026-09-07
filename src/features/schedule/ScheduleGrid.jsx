@@ -15,11 +15,11 @@ export default function ScheduleGrid({ lessons, getCellLesson, renderCell, onCel
         className="grid min-w-225"
         style={{ gridTemplateColumns: `130px repeat(${DAYS.length}, minmax(150px, 1fr))` }}
       >
-        <div className="border-b border-r border-base-300 bg-base-200/50 p-3" />
+        <div className="sticky left-0 top-0 z-20 border-b border-r border-base-300 bg-base-200/90 p-3 backdrop-blur-sm" />
         {DAYS.map((d, i) => (
           <div
             key={d.key}
-            className="border-b border-r border-base-300 bg-base-200/50 p-3 text-center text-xs font-semibold uppercase tracking-wide text-base-content/60 last:border-r-0"
+            className="sticky top-0 z-10 border-b border-r border-base-300 bg-base-200/90 p-3 text-center text-xs font-semibold uppercase tracking-wide text-base-content/60 backdrop-blur-sm"
           >
             {d.label}
             {weekStart && (
@@ -32,7 +32,7 @@ export default function ScheduleGrid({ lessons, getCellLesson, renderCell, onCel
 
         {rows.map(({ key, label, timeSlot }) => (
           <Fragment key={key}>
-            <div className="flex items-center gap-2 border-b-2 border-r border-base-300 bg-base-200/20 p-3 text-xs font-medium text-base-content/50">
+            <div className="sticky left-0 z-10 flex items-center gap-2 border-b-2 border-r border-base-300 bg-base-200/95 p-3 text-xs font-medium text-base-content/50 backdrop-blur-sm">
               <Icon name="clock" className="size-3.5 shrink-0 text-base-content/55" />
               <div className="flex flex-col">
                 {label ? (
@@ -51,7 +51,7 @@ export default function ScheduleGrid({ lessons, getCellLesson, renderCell, onCel
               const content = lesson ? (
                 renderCell(lesson)
               ) : editable ? (
-                <span className="flex size-6 items-center justify-center rounded-full text-base-content/20 transition-colors duration-200 group-hover:bg-primary/10 group-hover:text-primary">
+                  <span title="Dars qo'shish" className="flex size-7 items-center justify-center rounded-full text-base-content/20 transition-colors duration-200 group-hover:bg-primary/10 group-hover:text-primary">
                   <Icon
                     name="plus"
                     className="size-3.5 transition-transform duration-300 group-hover:rotate-90 group-hover:scale-110"

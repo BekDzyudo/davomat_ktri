@@ -204,17 +204,17 @@ export default function PublicHome() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col p-4 pb-8 sm:p-6 sm:portrait:p-5">
-        <div className="mb-3 shrink-0 sm:portrait:mb-4">
-          <h1 className="text-xl font-black text-base-content sm:text-3xl sm:portrait:text-4xl">
+      <main className="mx-auto flex w-full max-w-[1600px] flex-1 flex-col p-3 pb-6 sm:p-6 sm:portrait:p-5">
+        <div className="mb-2 shrink-0 sm:mb-3 sm:portrait:mb-4">
+          <h1 className="text-lg font-black text-base-content sm:text-3xl sm:portrait:text-4xl">
             Dars jadvali va davomat monitoringi
           </h1>
         </div>
 
-        {groupsError && <p className="mb-3 shrink-0 text-sm text-error">{groupsError}</p>}
+        {groupsError && <p className="mb-2 shrink-0 text-xs text-error sm:mb-3 sm:text-sm">{groupsError}</p>}
 
         {groups.length > 0 && (
-          <div className="mb-3 flex shrink-0 gap-2 overflow-x-auto pb-1">
+          <div className="mb-2 flex shrink-0 gap-1.5 overflow-x-auto pb-1 sm:mb-3 sm:gap-2">
             {groups.map((g) => {
               const accent = getAccentColor(g.id)
               const isSelected = g.id === selectedGroupId
@@ -224,7 +224,7 @@ export default function PublicHome() {
                   type="button"
                   onClick={() => handleGroupChange(g.id)}
                   className={[
-                    'flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all duration-200 sm:px-4 sm:py-2 sm:text-sm sm:portrait:px-5 sm:portrait:py-2.5 sm:portrait:text-base',
+                    'flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-all duration-200 sm:gap-2 sm:px-4 sm:py-2 sm:text-sm sm:portrait:px-5 sm:portrait:py-2.5 sm:portrait:text-base',
                     isSelected
                       ? `${accent.solid} border-transparent text-white shadow-sm`
                       : 'border-base-300 bg-base-100 text-base-content/70 hover:border-base-content/20',
@@ -247,9 +247,9 @@ export default function PublicHome() {
             <span className="loading loading-spinner loading-lg text-primary" />
           </div>
         ) : (
-          <div className="flex flex-col gap-5">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-              <div className="flex min-w-0 flex-col gap-4 sm:flex-2">
+          <div className="flex flex-col gap-3 sm:gap-5">
+            <div className="flex min-w-0 flex-col items-stretch gap-4 sm:flex-row sm:items-start sm:gap-5">
+              <div className="flex min-w-0 flex-1 flex-col gap-2 sm:gap-4">
                 <WeekNavigator weekStart={weekStart} onChange={handleWeekChange} />
                 <WeeklyCalendarGrid
                   lessons={lessons}
@@ -272,13 +272,13 @@ export default function PublicHome() {
               </div>
             </div>
 
-            <div className="flex shrink-0 items-center gap-3 rounded-3xl bg-linear-to-r from-primary/10 via-secondary/10 to-accent/10 p-4 portrait:p-5">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-content shadow-sm portrait:size-12">
-                <Icon name="lightbulb" className="size-5 portrait:size-6" />
+            <div className="flex shrink-0 items-center gap-2 rounded-3xl bg-linear-to-r from-primary/10 via-secondary/10 to-accent/10 p-3 sm:gap-3 sm:p-4 portrait:p-5">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-content shadow-sm sm:size-10 portrait:size-12">
+                <Icon name="lightbulb" className="size-4 sm:size-5 portrait:size-6" />
               </span>
               <div className="min-w-0">
-                <p className="text-sm font-bold text-base-content portrait:text-base">Eslatma</p>
-                <p className="truncate text-xs text-base-content/60 portrait:text-sm">
+                <p className="text-xs font-bold text-base-content sm:text-sm portrait:text-base">Eslatma</p>
+                <p className="truncate text-[11px] text-base-content/60 sm:text-xs portrait:text-sm">
                   Darslarni o'z vaqtida boshlang va davomatni aniq monitoring qiling.
                 </p>
               </div>

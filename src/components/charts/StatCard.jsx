@@ -21,12 +21,12 @@ export default function StatCard({ icon, label, value, sublabel, trend, tone = '
   const t = TONES[tone] ?? TONES.primary
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm transition-shadow duration-200 hover:shadow-md">
+    <div className="group relative overflow-hidden rounded-2xl border border-base-300 border-l-4 bg-base-100 p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
       <div
         className={`pointer-events-none absolute -right-6 -top-6 size-24 rounded-full opacity-[0.08] transition-transform duration-300 group-hover:scale-110 ${t.blob}`}
       />
       <div className="relative mb-3 flex items-start justify-between gap-2">
-        <span className={`flex size-11 shrink-0 items-center justify-center rounded-full ${t.badge}`}>
+        <span className={`flex size-11 shrink-0 items-center justify-center rounded-2xl ring-1 ring-current/10 ${t.badge}`}>
           <Icon name={icon} className="size-5" />
         </span>
         {tag && (
@@ -36,9 +36,9 @@ export default function StatCard({ icon, label, value, sublabel, trend, tone = '
         )}
       </div>
       <p className="relative truncate text-sm font-medium text-base-content/60">{label}</p>
-      <p className="relative mt-0.5 text-3xl font-black tracking-tight text-base-content">{value}</p>
+      <p className="relative mt-0.5 text-3xl font-black tabular-nums tracking-tight text-base-content">{value}</p>
       {trend && (
-        <p className={`relative mt-2 truncate text-xs font-semibold ${TREND_TEXT_CLASS[trend.direction] ?? TREND_TEXT_CLASS.flat}`}>
+        <p className={`relative mt-2 inline-flex max-w-full items-center rounded-full bg-base-200 px-2 py-1 text-xs font-semibold ${TREND_TEXT_CLASS[trend.direction] ?? TREND_TEXT_CLASS.flat}`}>
           {TREND_ARROW[trend.direction] ?? TREND_ARROW.flat} {trend.text}
         </p>
       )}

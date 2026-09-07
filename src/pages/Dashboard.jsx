@@ -69,7 +69,11 @@ export default function Dashboard() {
   if (currentUser.role === ROLES.OQITUVCHI) {
     return (
       <div>
-        <PageHeader title={t('pages.dashboard.title')} icon="home" />
+        <PageHeader
+          title={t('pages.dashboard.title')}
+          description="Bugungi darslaringiz va davomat bo'yicha tezkor ish maydoni"
+          icon="home"
+        />
         <TeacherDashboard data={data} />
       </div>
     )

@@ -43,7 +43,7 @@ export default function WeeklyCalendarGrid({
             <div
               key={d.key}
               className={[
-                'border-b border-r border-base-300 bg-base-200 p-1.5 text-center text-[10px] font-bold uppercase tracking-wide last:border-r-0 lg:p-3 lg:text-sm',
+                'border-b border-r border-base-300 bg-base-200 p-1.5 text-center text-[10px] font-bold uppercase tracking-wide lg:p-3 lg:text-sm',
                 d.key === todayKey ? 'bg-primary/15 text-primary' : 'text-base-content/70',
               ].join(' ')}
             >
@@ -75,7 +75,7 @@ export default function WeeklyCalendarGrid({
                 return (
                   <div
                     key={`${d.key}-${key}`}
-                    className="flex min-h-24 flex-col gap-1.5 border-b-2 border-r border-base-300 p-1.5 last:border-r-0 lg:gap-2 lg:p-3"
+                    className="flex min-h-20 flex-col gap-1 border-b-2 border-r border-base-300 p-1 sm:min-h-24 sm:gap-1.5 sm:p-1.5 lg:gap-2 lg:p-3"
                   >
                     {cellLessons.map((lesson) => {
                       if (lesson.cancelled) {
@@ -110,7 +110,7 @@ export default function WeeklyCalendarGrid({
                           onClick={() => onSelectLesson(lesson.id)}
                           title={lesson.note || lesson.subjectName}
                           className={[
-                            'flex w-full flex-col items-start gap-0.5 rounded-2xl border-l-4 px-2 py-1.5 text-left text-[10.5px] leading-snug transition-all duration-200 lg:gap-1 lg:px-3.5 lg:py-3 lg:text-base',
+                            'flex w-full flex-col items-start gap-0.5 rounded-2xl border-l-4 px-1.5 py-1 text-left text-[9px] leading-snug transition-all duration-200 sm:px-2 sm:py-1.5 sm:text-[10.5px] lg:gap-1 lg:px-3.5 lg:py-3 lg:text-base',
                             typeStyle.border,
                             stateClasses,
                           ].join(' ')}

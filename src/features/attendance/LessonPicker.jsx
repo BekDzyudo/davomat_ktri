@@ -33,30 +33,34 @@ export default function LessonPicker({ lessons, selectedId, weekStart, onSelect,
             type="button"
             onClick={() => onSelect(lesson.id)}
             className={[
-              'flex w-56 shrink-0 flex-col gap-1.5 rounded-box border p-3.5 text-left transition-all duration-200',
+              'group flex w-64 shrink-0 flex-col gap-2 rounded-2xl border p-4 text-left transition-all duration-200 hover:shadow-md',
               isSelected
-                ? 'border-primary bg-primary/5 shadow-sm ring-2 ring-primary/20'
-                : 'border-base-300 bg-base-100 hover:border-base-content/20',
+                ? 'border-primary bg-primary/5 shadow-md ring-2 ring-primary/20'
+                : 'border-base-300 bg-base-100 hover:border-primary/30',
             ].join(' ')}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="flex items-center gap-1.5 text-xs font-medium text-base-content/60">
+              <span className="flex items-center gap-1.5 text-xs font-bold tabular-nums text-base-content/65">
                 <Icon name="clock" className="size-3.5 shrink-0" />
                 {lesson.timeSlot}
               </span>
-              <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${BADGE_TONE[state]}`}>
+              <span className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-bold ${BADGE_TONE[state]}`}>
                 {BADGE_LABEL[state]}
               </span>
             </div>
-            <p className="truncate text-sm font-semibold text-base-content">
+            <p className="line-clamp-2 min-h-10 text-sm font-black leading-tight text-base-content">
               {subjectName(lesson.subjectId)}
             </p>
-            <p className="flex items-center gap-1.5 truncate text-xs text-base-content/60">
-              <Icon name="group" className="size-3.5 shrink-0" />
+            <p className="flex items-center gap-1.5 truncate rounded-lg bg-base-200/60 px-2 py-1.5 text-xs text-base-content/65">
+              <Icon name="group" className="size-3.5 shrink-0 text-primary/65" />
               <span className="truncate">
                 {groupName(lesson.groupId)} · {lesson.room}
               </span>
             </p>
+            <div className="flex items-center justify-between border-t border-base-300/70 pt-2 text-[10px] font-bold uppercase tracking-wide text-base-content/40">
+              <span>{isSelected ? 'Tanlangan' : 'Darsni tanlash'}</span>
+              <Icon name="chevronRight" className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+            </div>
           </button>
         )
       })}

@@ -13,6 +13,7 @@ import Profile from './pages/Profile'
 import PublicHome from './pages/PublicHome'
 import Reports from './pages/Reports'
 import Schedule from './pages/Schedule'
+import Staff from './pages/Staff'
 import Subjects from './pages/Subjects'
 import Users from './pages/Users'
 import DashboardRoute from './routes/DashboardRoute'
@@ -36,6 +37,14 @@ export default function App() {
           element={
             <RequireRole roles={ADMIN_ROLES}>
               <Users />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/staff"
+          element={
+            <RequireRole roles={ADMIN_ROLES}>
+              <Staff />
             </RequireRole>
           }
         />

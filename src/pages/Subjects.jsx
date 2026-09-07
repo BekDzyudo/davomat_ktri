@@ -73,6 +73,10 @@ export default function Subjects() {
   const { query, setQuery, page, setPage, totalPages, pageItems, totalItems, pageSize } =
     useTableQuery(subjects, { filterFn: filterSubject })
 
+  const assignedCount = subjects.filter((subject) => assignments.some((assignment) => assignment.subjectId === subject.id)).length
+  const totalHours = subjects.reduce((sum, subject) => sum + subject.theoryHours + subject.practiceHours, 0)
+  const unassignedCount = subjects.length - assignedCount
+
   const handleSubmit = async (data) => {
     if (modalState.mode === 'edit') {
       const updated = await updateSubject(data.id, data)
@@ -128,9 +132,38 @@ export default function Subjects() {
         </div>
       )}
 
-      <div className="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm sm:p-6">
-        <div className="mb-4">
-          <SearchInput value={query} onChange={setQuery} placeholder="Modul nomi bo'yicha qidirish" />
+      <div className="overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm">
+        <div className="grid grid-cols-3 border-b border-base-300 bg-base-200/45">
+          <div className="border-r border-base-300 p-4 sm:p-5">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-base-content/45">Jami modullar</span>
+            <p className="mt-1.5 text-2xl font-black text-base-content">{subjects.length}</p>
+          </div>
+          <div className="border-r border-base-300 p-4 sm:p-5">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-base-content/45">Biriktirilgan</span>
+            <p className="mt-1.5 text-2xl font-black text-success">{assignedCount}</p>
+          </div>
+          <div className="p-4 sm:p-5">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-base-content/45">Jami soat</span>
+            <p className="mt-1.5 text-2xl font-black text-primary">{totalHours}</p>
+          </div>
+        </div>
+
+        <div className="border-b border-base-300 p-4 sm:p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-base font-black text-base-content sm:text-lg">Modullar ro'yxati</h2>
+              <p className="mt-1 text-xs text-base-content/50 sm:text-sm">
+                O'qituvchi va guruhlarga biriktirilgan o'quv modullari
+              </p>
+            </div>
+            <div className="flex items-center gap-3 text-xs font-semibold text-base-content/45">
+              {unassignedCount > 0 && <span className="text-warning">{unassignedCount} ta biriktirilmagan</span>}
+              <span>{totalItems} ta natija</span>
+            </div>
+          </div>
+          <div className="mt-4">
+            <SearchInput value={query} onChange={setQuery} placeholder="Modul nomi bo'yicha qidirish" />
+          </div>
         </div>
 
         {loadError ? (
@@ -142,36 +175,77 @@ export default function Subjects() {
         ) : pageItems.length === 0 ? (
           <EmptyState message="Hech narsa topilmadi" />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="table">
+          <div className="overflow-x-auto px-4 sm:px-5">
+            <table className="table min-w-260">
               <thead>
-                <tr className="text-xs uppercase text-base-content/50">
-                  <th className="w-10">#</th>
-                  <th>Nomi</th>
-                  <th>Nazariy / Amaliy</th>
-                  <th>Jami soat</th>
-                  <th>O'qituvchi</th>
-                  <th>Guruhlar</th>
-                  <th className="text-right">Amallar</th>
+                <tr className="border-b border-base-300 text-[10px] uppercase tracking-wider text-base-content/45">
+                  <th className="w-12 pb-3">#</th>
+                  <th className="pb-3">Modul</th>
+                  <th className="pb-3">Soatlar taqsimoti</th>
+                  <th className="pb-3">Jami</th>
+                  <th className="pb-3">O'qituvchi</th>
+                  <th className="pb-3">Guruhlar</th>
+                  <th className="pb-3 text-right">Amallar</th>
                 </tr>
               </thead>
               <tbody>
                 {pageItems.map((subject, index) => (
-                  <tr key={subject.id}>
-                    <td className="text-base-content/40">{(page - 1) * pageSize + index + 1}</td>
-                    <td className="font-medium text-base-content">{subject.name}</td>
-                    <td className="text-base-content/70">
-                      {subject.theoryHours} / {subject.practiceHours}
-                    </td>
-                    <td className="text-base-content/70">{subject.theoryHours + subject.practiceHours}</td>
-                    <td className="text-base-content/70">
-                      {teacherNames(subject.id) || <span className="text-base-content/40">Biriktirilmagan</span>}
-                    </td>
-                    <td className="text-base-content/70">
-                      {groupNames(subject.id) || <span className="text-base-content/40">—</span>}
+                  <tr key={subject.id} className="group border-b border-base-200 transition-colors hover:bg-primary/[0.035]">
+                    <td className="text-xs font-semibold text-base-content/35">{(page - 1) * pageSize + index + 1}</td>
+                    <td>
+                      <div className="flex min-w-0 items-center gap-3">
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                          <Icon name="book" className="size-4" />
+                        </span>
+                        <div className="min-w-0">
+                          <p className="max-w-sm truncate font-bold text-base-content">{subject.name}</p>
+                          <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-base-content/40">
+                            {subject.subjectType === 'practice' ? 'Amaliy modul' : 'Nazariy modul'}
+                          </p>
+                        </div>
+                      </div>
                     </td>
                     <td>
-                      <div className="flex justify-end gap-1">
+                      <div className="w-36">
+                        <div className="mb-1 flex justify-between text-[10px] font-semibold text-base-content/50">
+                          <span>Nazariy {subject.theoryHours}</span>
+                          <span>Amaliy {subject.practiceHours}</span>
+                        </div>
+                        <div className="flex h-2 overflow-hidden rounded-full bg-base-300">
+                          <span
+                            className="bg-primary"
+                            style={{
+                              width: `${((subject.theoryHours / (subject.theoryHours + subject.practiceHours || 1)) * 100).toFixed(2)}%`,
+                            }}
+                          />
+                          <span
+                            className="bg-accent"
+                            style={{
+                              width: `${((subject.practiceHours / (subject.theoryHours + subject.practiceHours || 1)) * 100).toFixed(2)}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className="inline-flex rounded-lg bg-base-200 px-2.5 py-1 text-xs font-bold tabular-nums text-base-content/70">
+                        {subject.theoryHours + subject.practiceHours} soat
+                      </span>
+                    </td>
+                    <td className="max-w-48 text-xs text-base-content/70">
+                      <span className="line-clamp-2">
+                        {teacherNames(subject.id) || <span className="text-base-content/35">Biriktirilmagan</span>}
+                      </span>
+                    </td>
+                    <td className="max-w-44 text-xs text-base-content/70">
+                      {groupNames(subject.id) ? (
+                        <span className="line-clamp-2">{groupNames(subject.id)}</span>
+                      ) : (
+                        <span className="text-base-content/35">—</span>
+                      )}
+                    </td>
+                    <td>
+                      <div className="flex justify-end gap-1 opacity-70 transition-opacity group-hover:opacity-100">
                         <RowActionButton
                           icon="group"
                           label="Biriktirish"

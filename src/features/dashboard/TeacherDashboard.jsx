@@ -54,20 +54,61 @@ export default function TeacherDashboard({ data }) {
   // oldindan 1 soat o'tguncha) va hali belgilanmagan darslar ko'rsatiladi —
   // ertangi/kechroqdagi yoki muddati o'tib ketgan darslar bu yerda chiqmaydi.
   const unmarkedLessons = todaysLessons.filter((l) => !isMarked(l) && isCurrentlyMarkable(l, now))
+  const markedLessons = todaysLessons.filter(isMarked).length
+  const nextLesson = todaysLessons.find((lesson) => {
+    const start = timeToday(lesson.start_time)
+    return start && start > now
+  })
 
   return (
     <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+          <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <Icon name="calendar" className="size-4" />
+          </span>
+          <p className="mt-3 text-[10px] font-bold uppercase tracking-wide text-base-content/45">Bugungi darslar</p>
+          <p className="mt-1 text-2xl font-black tabular-nums text-base-content">{todaysLessons.length}</p>
+        </div>
+        <div className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+          <span className="flex size-9 items-center justify-center rounded-xl bg-success/10 text-success">
+            <Icon name="check" className="size-4" />
+          </span>
+          <p className="mt-3 text-[10px] font-bold uppercase tracking-wide text-base-content/45">Yakunlangan</p>
+          <p className="mt-1 text-2xl font-black tabular-nums text-success">{markedLessons}</p>
+        </div>
+        <div className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+          <span className="flex size-9 items-center justify-center rounded-xl bg-warning/10 text-warning">
+            <Icon name="alertTriangle" className="size-4" />
+          </span>
+          <p className="mt-3 text-[10px] font-bold uppercase tracking-wide text-base-content/45">Kutilayotgan</p>
+          <p className="mt-1 text-2xl font-black tabular-nums text-warning">{unmarkedLessons.length}</p>
+        </div>
+        <div className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+          <span className="flex size-9 items-center justify-center rounded-xl bg-info/10 text-info">
+            <Icon name="clock" className="size-4" />
+          </span>
+          <p className="mt-3 text-[10px] font-bold uppercase tracking-wide text-base-content/45">Keyingi dars</p>
+          <p className="mt-1 truncate text-sm font-black text-base-content">
+            {nextLesson ? lessonTime(nextLesson).split(' - ')[0] : '—'}
+          </p>
+        </div>
+      </div>
+
       {unmarkedLessons.length > 0 && (
-        <div className="rounded-box border border-warning/30 bg-warning/10 p-4">
-          <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-warning">
+        <div className="rounded-2xl border border-warning/30 bg-warning/10 p-4 shadow-sm">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-sm font-black text-warning">
             <Icon name="alertTriangle" className="size-4 shrink-0" />
             Hali belgilanmagan davomat ({unmarkedLessons.length})
+            </div>
+            <span className="rounded-full bg-warning/15 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-warning">Amal kerak</span>
           </div>
           <ul className="flex flex-col gap-2">
             {unmarkedLessons.map((lesson, i) => (
               <li
                 key={lesson.id ?? lesson.schedule_id ?? i}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-warning/20 bg-base-100 px-3.5 py-2.5"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-warning/20 bg-base-100 px-3.5 py-3 shadow-sm"
               >
                 <div className="flex min-w-0 items-center gap-2 text-sm">
                   <Icon name="clock" className="size-4 shrink-0 text-warning" />
@@ -89,8 +130,16 @@ export default function TeacherDashboard({ data }) {
         </div>
       )}
 
-      <div>
-        <h2 className="mb-3 text-sm font-semibold text-base-content">Bugungi darslar</h2>
+      <div className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm sm:p-5">
+        <div className="mb-4 flex items-end justify-between gap-2">
+          <div>
+            <h2 className="text-sm font-black text-base-content">Bugungi darslar</h2>
+            <p className="mt-1 text-xs text-base-content/45">Darsni tanlab davomatni boshqarishingiz mumkin</p>
+          </div>
+          <button type="button" onClick={() => navigate('/schedule')} className="text-xs font-semibold text-primary hover:underline">
+            Jadvalni ko'rish
+          </button>
+        </div>
         {todaysLessons.length === 0 ? (
           <p className="text-sm text-base-content/50">Bugun darslaringiz yo'q</p>
         ) : (
@@ -100,13 +149,17 @@ export default function TeacherDashboard({ data }) {
                 key={lesson.id ?? lesson.schedule_id ?? i}
                 type="button"
                 onClick={() => navigate('/attendance')}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-box border border-base-300 bg-base-100 px-4 py-3 text-left shadow-sm transition-colors duration-200 hover:border-primary/40"
+                className="group flex flex-wrap items-center justify-between gap-3 rounded-xl border border-base-300 bg-base-100 px-4 py-3.5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
               >
                 <div className="flex min-w-0 items-center gap-2 text-sm">
-                  <Icon name="clock" className="size-4 shrink-0 text-primary/60" />
-                  <span className="truncate font-medium text-base-content">{lessonLabel(lesson)}</span>
-                  <span className="shrink-0 text-base-content/50">
-                    {lessonGroup(lesson)} · {lessonTime(lesson)}
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Icon name="clock" className="size-4" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate font-bold text-base-content">{lessonLabel(lesson)}</span>
+                    <span className="mt-0.5 block truncate text-xs text-base-content/50">
+                      {lessonGroup(lesson)} · {lessonTime(lesson)}
+                    </span>
                   </span>
                 </div>
                 <span

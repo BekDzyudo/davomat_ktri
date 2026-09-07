@@ -5,6 +5,7 @@ const { SUPERADMIN, ADMIN, DEKAN, OQITUVCHI, TALABA } = ROLES
 export const navItems = [
   { key: 'dashboard', path: '/dashboard', icon: 'home', roles: [SUPERADMIN, ADMIN, DEKAN, OQITUVCHI, TALABA] },
   { key: 'users', path: '/users', icon: 'users', roles: [SUPERADMIN, ADMIN] },
+  { key: 'staff', path: '/staff', icon: 'sitemap', roles: [SUPERADMIN, ADMIN] },
   { key: 'faculties', path: '/faculties', icon: 'building', roles: [SUPERADMIN, ADMIN] },
   { key: 'groups', path: '/groups', icon: 'group', roles: [SUPERADMIN, ADMIN] },
   { key: 'subjects', path: '/subjects', icon: 'book', roles: [SUPERADMIN, ADMIN] },

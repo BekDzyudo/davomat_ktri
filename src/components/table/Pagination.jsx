@@ -7,7 +7,7 @@ export default function Pagination({ page, totalPages, onChange, totalItems, pag
   const to = Math.min(page * pageSize, totalItems)
 
   return (
-    <div className="mt-4 flex flex-col items-center justify-between gap-3 border-t border-base-300 pt-4 sm:flex-row">
+    <div className="mt-5 flex flex-col items-center justify-between gap-3 border-t border-base-300 px-1 pb-2 pt-5 sm:flex-row">
       <p className="text-xs text-base-content/60">
         {totalItems} tadan {from}-{to} ko'rsatilmoqda
       </p>

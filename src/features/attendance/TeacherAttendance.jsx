@@ -5,6 +5,7 @@ import { listStudents } from '../../api/students'
 import Alert from '../../components/form/Alert'
 import Icon from '../../components/Icon'
 import { useAuth } from '../../context/useAuth'
+import { useToast } from '../../context/useToast'
 import { DAYS } from '../../data/mockSchedule'
 import { formatRemaining, getEditability, getEditabilityDeadline } from '../../utils/attendanceTime'
 import { getMonday, toIsoDate } from '../../utils/date'
@@ -41,11 +42,9 @@ export default function TeacherAttendance() {
   const [records, setRecords] = useState({})
   const [pendingFiles, setPendingFiles] = useState({})
   const [excuseTarget, setExcuseTarget] = useState(null)
-  const [savedBanner, setSavedBanner] = useState(false)
-  const [savedBannerDetails, setSavedBannerDetails] = useState('')
-  const [saveError, setSaveError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [now, setNow] = useState(() => new Date())
+  const toast = useToast()
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000)
@@ -103,12 +102,12 @@ export default function TeacherAttendance() {
         if (!cancelled) setRecordsByLesson(Object.fromEntries(entries))
       })
       .catch((err) => {
-        if (!cancelled) setSaveError(err.message ?? "Davomatni yuklab bo'lmadi")
+        if (!cancelled) toast.error(err.message ?? "Davomatni yuklab bo'lmadi")
       })
     return () => {
       cancelled = true
     }
-  }, [dayLessons, weekStart])
+  }, [dayLessons, weekStart, toast])
 
   const defaultLessonId = useMemo(() => {
     const withState = dayLessons.map((l) => {
@@ -190,7 +189,6 @@ export default function TeacherAttendance() {
     if (items.length === 0) return
 
     setIsSaving(true)
-    setSaveError('')
     try {
       await saveBulkAttendance({ scheduleId: selectedLesson.id, date: lessonDateIso, items })
       let refreshed = await listAttendanceFor({ scheduleId: selectedLesson.id, date: lessonDateIso })
@@ -210,15 +208,13 @@ export default function TeacherAttendance() {
       // Bildirishnomada belgilash oynasi qachon ochilgani/yopilishi va shu
       // vaqtgacha tahrirlash mumkinligi ham ko'rsatiladi.
       const deadline = lessonEnd ? getEditabilityDeadline(lessonEnd) : null
-      setSavedBannerDetails(
+      const details =
         lessonStart && deadline
           ? `Ochilish: ${formatTime(lessonStart)} · Yopilish: ${formatTime(deadline)} — shu vaqtgacha tahrirlash mumkin`
-          : '',
-      )
-      setSavedBanner(true)
-      setTimeout(() => setSavedBanner(false), 5000)
+          : ''
+      toast.success('Davomat saqlandi.', details)
     } catch (err) {
-      setSaveError(err.message ?? 'Saqlashda xatolik yuz berdi')
+      toast.error(err.message ?? 'Saqlashda xatolik yuz berdi')
     } finally {
       setIsSaving(false)
     }
@@ -236,6 +232,47 @@ export default function TeacherAttendance() {
 
   return (
     <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+          <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <Icon name="calendar" className="size-4" />
+          </span>
+          <p className="mt-3 text-[10px] font-bold uppercase tracking-wide text-base-content/45">Tanlangan kun</p>
+          <p className="mt-1 text-2xl font-black tabular-nums text-base-content">{dayLessons.length}</p>
+          <p className="mt-0.5 text-xs text-base-content/45">ta dars</p>
+        </div>
+        <div className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+          <span className="flex size-9 items-center justify-center rounded-xl bg-success/10 text-success">
+            <Icon name="check" className="size-4" />
+          </span>
+          <p className="mt-3 text-[10px] font-bold uppercase tracking-wide text-base-content/45">Davomat yozuvi</p>
+          <p className="mt-1 text-2xl font-black tabular-nums text-success">
+            {dayLessons.filter((lesson) => (recordsByLesson[lesson.id]?.length ?? 0) > 0).length}
+          </p>
+          <p className="mt-0.5 text-xs text-base-content/45">tayyor dars</p>
+        </div>
+        <div className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+          <span className="flex size-9 items-center justify-center rounded-xl bg-info/10 text-info">
+            <Icon name="users" className="size-4" />
+          </span>
+          <p className="mt-3 text-[10px] font-bold uppercase tracking-wide text-base-content/45">Tanlangan guruh</p>
+          <p className="mt-1 truncate text-sm font-black text-base-content">
+            {selectedLesson?.groupName ?? 'Dars tanlanmagan'}
+          </p>
+          <p className="mt-0.5 text-xs text-base-content/45">{groupStudents.length} ta tinglovchi</p>
+        </div>
+        <div className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
+          <span className={`flex size-9 items-center justify-center rounded-xl ${editable ? 'bg-warning/10 text-warning' : 'bg-base-200 text-base-content/45'}`}>
+            <Icon name="clock" className="size-4" />
+          </span>
+          <p className="mt-3 text-[10px] font-bold uppercase tracking-wide text-base-content/45">Joriy holat</p>
+          <p className={`mt-1 text-sm font-black ${editable ? 'text-warning' : 'text-base-content'}`}>
+            {editable ? 'Belgilash ochiq' : selectedLesson ? 'Yopiq' : 'Tanlanmagan'}
+          </p>
+          <p className="mt-0.5 text-xs text-base-content/45">tanlangan dars</p>
+        </div>
+      </div>
+
       <WeekNavigator weekStart={weekStart} onChange={handleWeekChange} />
 
       <DayTabs
@@ -245,8 +282,6 @@ export default function TeacherAttendance() {
         todayKey={getTodayDayKeyInWeek(weekStart)}
         weekStart={weekStart}
       />
-
-      {saveError && <Alert variant="error">{saveError}</Alert>}
 
       {editable && remainingMs !== null && selectedLesson && (
         <div className="flex items-center gap-3 rounded-box border border-warning/40 bg-warning/10 px-4 py-3 shadow-sm">
@@ -298,9 +333,6 @@ export default function TeacherAttendance() {
                   : 'Davomat belgilash vaqti hali kelmagan.')
               }
               blockMessage={BLOCK_MESSAGES[blockReason]}
-              savedBanner={savedBanner}
-              savedDetails={savedBannerDetails}
-              onDismissSaved={() => setSavedBanner(false)}
               onStatusChange={handleStatusChange}
               onMarkAllPresent={handleMarkAllPresent}
               onSave={handleSave}

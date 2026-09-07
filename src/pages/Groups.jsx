@@ -51,6 +51,10 @@ export default function Groups() {
   const { query, setQuery, page, setPage, totalPages, pageItems, totalItems, pageSize } =
     useTableQuery(groups, { filterFn: filterGroup })
 
+  const totalStudents = groups.reduce((sum, group) => sum + (group.studentsCount ?? 0), 0)
+  const facultyCount = new Set(groups.map((group) => group.faculty).filter(Boolean)).size
+  const directionCount = new Set(groups.map((group) => group.direction).filter(Boolean)).size
+
   const handleSubmit = async (data) => {
     if (modalState.mode === 'edit') {
       const updated = await updateGroup(data.id, data)
@@ -96,13 +100,43 @@ export default function Groups() {
         </div>
       )}
 
-      <div className="rounded-box border border-base-300 bg-base-100 p-4 shadow-sm sm:p-6">
-        <div className="mb-4">
-          <SearchInput
-            value={query}
-            onChange={setQuery}
-            placeholder="Guruh yoki yo'nalish bo'yicha qidirish"
-          />
+      <div className="overflow-hidden rounded-3xl border border-base-300 bg-base-100 shadow-sm">
+        <div className="grid grid-cols-2 border-b border-base-300 bg-base-200/45 sm:grid-cols-4">
+          <div className="border-b border-r border-base-300 p-4 sm:border-b-0 sm:p-5">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-base-content/45">Jami guruhlar</span>
+            <p className="mt-1.5 text-2xl font-black text-base-content">{groups.length}</p>
+          </div>
+          <div className="border-b border-base-300 p-4 sm:border-b-0 sm:border-r sm:p-5">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-base-content/45">Talabalar</span>
+            <p className="mt-1.5 text-2xl font-black text-primary">{totalStudents}</p>
+          </div>
+          <div className="border-r border-base-300 p-4 sm:p-5">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-base-content/45">Fakultetlar</span>
+            <p className="mt-1.5 text-2xl font-black text-secondary">{facultyCount}</p>
+          </div>
+          <div className="p-4 sm:p-5">
+            <span className="text-[10px] font-bold uppercase tracking-wide text-base-content/45">Yo'nalishlar</span>
+            <p className="mt-1.5 text-2xl font-black text-accent">{directionCount}</p>
+          </div>
+        </div>
+
+        <div className="border-b border-base-300 p-4 sm:p-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-base font-black text-base-content sm:text-lg">Guruhlar ro'yxati</h2>
+              <p className="mt-1 text-xs text-base-content/50 sm:text-sm">
+                Yo'nalish, fakultet va talabalar tarkibi bo'yicha ma'lumotlar
+              </p>
+            </div>
+            <span className="text-xs font-semibold text-base-content/45">{totalItems} ta natija</span>
+          </div>
+          <div className="mt-4">
+            <SearchInput
+              value={query}
+              onChange={setQuery}
+              placeholder="Guruh yoki yo'nalish bo'yicha qidirish"
+            />
+          </div>
         </div>
 
         {loadError ? (
@@ -114,34 +148,59 @@ export default function Groups() {
         ) : pageItems.length === 0 ? (
           <EmptyState message="Hech narsa topilmadi" />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="table">
+          <div className="overflow-x-auto px-4 sm:px-5">
+            <table className="table min-w-260">
               <thead>
-                <tr className="text-xs uppercase text-base-content/50">
-                  <th className="w-10">#</th>
-                  <th>Nomi</th>
-                  <th>Yo'nalish</th>
-                  <th>O'quv yili</th>
-                  <th>Fakultet</th>
-                  <th>Talabalar</th>
-                  <th className="text-right">Amallar</th>
+                <tr className="border-b border-base-300 text-[10px] uppercase tracking-wider text-base-content/45">
+                  <th className="w-12 pb-3">#</th>
+                  <th className="pb-3">Guruh</th>
+                  <th className="pb-3">Yo'nalish</th>
+                  <th className="pb-3">O'quv yili</th>
+                  <th className="pb-3">Fakultet</th>
+                  <th className="pb-3">Talabalar</th>
+                  <th className="pb-3 text-right">Amallar</th>
                 </tr>
               </thead>
               <tbody>
                 {pageItems.map((group, index) => (
                   <tr
                     key={group.id}
-                    className="cursor-pointer hover:bg-base-200/50"
+                    className="group cursor-pointer border-b border-base-200 transition-colors hover:bg-primary/[0.035]"
                     onClick={() => navigate(`/groups/${group.id}`)}
                   >
-                    <td className="text-base-content/40">{(page - 1) * pageSize + index + 1}</td>
-                    <td className="font-medium text-base-content">{group.name}</td>
-                    <td className="text-base-content/70">{group.direction}</td>
-                    <td className="text-base-content/70">{group.academicYear}</td>
-                    <td className="text-base-content/70">{facultyName(group.faculty)}</td>
-                    <td className="text-base-content/70">{group.studentsCount ?? 0}</td>
+                    <td className="text-xs font-semibold text-base-content/35">{(page - 1) * pageSize + index + 1}</td>
+                    <td>
+                      <div className="flex min-w-0 items-center gap-3">
+                        <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary/10 text-secondary">
+                          <Icon name="group" className="size-4" />
+                        </span>
+                        <div className="min-w-0">
+                          <p className="font-bold text-base-content">{group.name}</p>
+                          <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-base-content/40">
+                            Guruh profili
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="max-w-56 text-xs text-base-content/70">
+                      <span className="line-clamp-2">{group.direction}</span>
+                    </td>
+                    <td>
+                      <span className="inline-flex rounded-lg bg-base-200 px-2.5 py-1 text-xs font-bold tabular-nums text-base-content/70">
+                        {group.academicYear}
+                      </span>
+                    </td>
+                    <td className="max-w-64 text-xs text-base-content/70">
+                      <span className="line-clamp-2">{facultyName(group.faculty)}</span>
+                    </td>
+                    <td>
+                      <span className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-bold tabular-nums text-primary">
+                        <Icon name="user" className="size-3.5" />
+                        {group.studentsCount ?? 0}
+                      </span>
+                    </td>
                     <td onClick={(e) => e.stopPropagation()}>
-                      <div className="flex justify-end gap-1">
+                      <div className="flex justify-end gap-1 opacity-70 transition-opacity group-hover:opacity-100">
                         <RowActionButton
                           icon="eye"
                           label="Talabalar"

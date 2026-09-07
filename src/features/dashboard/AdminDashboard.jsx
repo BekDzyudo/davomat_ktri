@@ -66,9 +66,15 @@ export default function AdminDashboard({ data }) {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="min-w-0 rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm lg:col-span-2">
-          <h2 className="mb-4 text-sm font-semibold text-base-content">
-            Oylik davomat statistikasi
-          </h2>
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-black text-base-content">Oylik davomat statistikasi</h2>
+              <p className="mt-1 text-xs text-base-content/45">Institut bo'yicha davomat dinamikasi</p>
+            </div>
+            <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <Icon name="chart" className="size-4" />
+            </span>
+          </div>
           {lineData.length === 0 ? (
             <p className="py-8 text-center text-sm text-base-content/50">Ma'lumot yo'q</p>
           ) : (
@@ -77,7 +83,15 @@ export default function AdminDashboard({ data }) {
         </div>
 
         <div className="min-w-0 rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
-          <h2 className="mb-4 text-sm font-semibold text-base-content">Holatlar bo'yicha taqsimot</h2>
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-black text-base-content">Holatlar bo'yicha taqsimot</h2>
+              <p className="mt-1 text-xs text-base-content/45">Davomat yozuvlarining umumiy holati</p>
+            </div>
+            <span className="flex size-9 items-center justify-center rounded-xl bg-secondary/10 text-secondary">
+              <Icon name="chart" className="size-4" />
+            </span>
+          </div>
           {statusData.length === 0 ? (
             <p className="py-8 text-center text-sm text-base-content/50">Ma'lumot yo'q</p>
           ) : (
@@ -93,8 +107,11 @@ export default function AdminDashboard({ data }) {
       </div>
 
       <div className="rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm">
-        <div className="mb-4 flex items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-base-content">Eng past davomatga ega guruhlar</h2>
+        <div className="mb-4 flex items-end justify-between gap-2">
+          <div>
+            <h2 className="text-sm font-black text-base-content">Eng past davomatga ega guruhlar</h2>
+            <p className="mt-1 text-xs text-base-content/45">E'tibor talab qiladigan guruhlar</p>
+          </div>
           <Link
             to="/groups"
             className="group inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-primary hover:underline"

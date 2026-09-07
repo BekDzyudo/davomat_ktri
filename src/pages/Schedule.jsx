@@ -106,31 +106,34 @@ export default function Schedule() {
 
     return (
       <div
-        className={`group/cell relative flex h-full flex-col gap-1.5 rounded-xl border-l-4 bg-base-100 p-2.5 shadow-sm ring-1 ring-base-300 ${accent.borderL}`}
+        className={`group/cell relative flex h-full min-h-20 flex-col gap-1.5 rounded-xl border-l-4 bg-base-100 p-2.5 shadow-sm ring-1 ring-base-300 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${accent.borderL}`}
       >
         {canEdit && (
-          <span className="absolute right-1.5 top-1.5 flex size-5 items-center justify-center rounded-full bg-base-200/80 text-base-content/70 opacity-0 transition-opacity group-hover/cell:opacity-100">
+          <span title="Darsni tahrirlash" className="absolute right-1.5 top-1.5 flex size-6 items-center justify-center rounded-full bg-base-200/90 text-base-content/70 opacity-0 shadow-sm transition-all group-hover/cell:scale-105 group-hover/cell:opacity-100">
             <Icon name="pencil" className="size-3" />
           </span>
         )}
-        <p className="line-clamp-2 pr-4 text-[13px] font-bold leading-tight text-base-content">
-          {lesson.subjectName}
-        </p>
-        <div className="flex items-center gap-1.5 text-[11px] leading-tight text-base-content/60">
-          <Icon name="mapPin" className="size-3 shrink-0" />
-          <span className="truncate">{lesson.room}</span>
+        <div className="flex items-start justify-between gap-2 pr-5">
+          <p className="line-clamp-2 text-[13px] font-black leading-tight text-base-content">
+            {lesson.subjectName}
+          </p>
+          <Icon name="book" className="mt-0.5 size-3.5 shrink-0 text-primary/55" />
+        </div>
+        <div className="flex min-w-0 items-center gap-1.5 text-[11px] leading-tight text-base-content/60">
+          <Icon name="mapPin" className="size-3 shrink-0 text-primary/60" />
+          <span className="truncate">{lesson.room || 'Xona belgilanmagan'}</span>
+        </div>
+        <div className="mt-auto flex min-w-0 items-center justify-between gap-2 border-t border-base-200 pt-2">
+          <span className={`inline-flex max-w-[75%] items-center gap-1 truncate rounded-full px-2 py-1 text-[10px] font-bold ${accent.bg} ${accent.text}`}>
+            <Icon name={isTeacherView ? 'group' : 'user'} className="size-3 shrink-0" />
+            {personName}
+          </span>
           {lesson.lessonTypeDisplay && (
-            <>
-              <span className="text-base-content/30">·</span>
-              <span className="shrink-0">{lesson.lessonTypeDisplay}</span>
-            </>
+            <span className="shrink-0 text-[9px] font-bold uppercase tracking-wide text-base-content/40">
+              {lesson.lessonTypeDisplay}
+            </span>
           )}
         </div>
-        <span
-          className={`mt-auto inline-flex w-fit max-w-full items-center truncate rounded-full px-2 py-1 text-[10px] font-bold ${accent.bg} ${accent.text}`}
-        >
-          {personName}
-        </span>
       </div>
     )
   }

@@ -6,6 +6,7 @@ import { listStudents } from '../../api/students'
 import Alert from '../../components/form/Alert'
 import GroupChipRow from '../../components/GroupChipRow'
 import Icon from '../../components/Icon'
+import { useToast } from '../../context/useToast'
 import { DAYS } from '../../data/mockSchedule'
 import { usePersistedGroupId } from '../../hooks/usePersistedGroupId'
 import { getLessonStart, getLessonTiming, getTodayDayKeyInWeek } from '../../utils/publicSchedule'
@@ -32,9 +33,8 @@ export default function AdminAttendance() {
   const [records, setRecords] = useState({})
   const [pendingFiles, setPendingFiles] = useState({})
   const [excuseTarget, setExcuseTarget] = useState(null)
-  const [savedBanner, setSavedBanner] = useState(false)
-  const [saveError, setSaveError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const toast = useToast()
 
   useEffect(() => {
     let cancelled = false
@@ -101,7 +101,7 @@ export default function AdminAttendance() {
         setPendingFiles({})
       })
       .catch((err) => {
-        if (!cancelled) setSaveError(err.message ?? "Davomatni yuklab bo'lmadi")
+        if (!cancelled) toast.error(err.message ?? "Davomatni yuklab bo'lmadi")
       })
     return () => {
       cancelled = true
@@ -142,7 +142,6 @@ export default function AdminAttendance() {
     if (items.length === 0) return
 
     setIsSaving(true)
-    setSaveError('')
     try {
       await saveBulkAttendance({ scheduleId: selectedLesson.id, date: lessonDateIso, items })
       let refreshed = await listAttendanceFor({ scheduleId: selectedLesson.id, date: lessonDateIso })
@@ -160,10 +159,9 @@ export default function AdminAttendance() {
         Object.fromEntries(refreshed.map((r) => [r.studentId, { status: r.status, reasonText: r.reasonText }])),
       )
       setPendingFiles({})
-      setSavedBanner(true)
-      setTimeout(() => setSavedBanner(false), 5000)
+      toast.success('Davomat saqlandi.')
     } catch (err) {
-      setSaveError(err.message ?? "Saqlashda xatolik yuz berdi")
+      toast.error(err.message ?? "Saqlashda xatolik yuz berdi")
     } finally {
       setIsSaving(false)
     }
@@ -192,8 +190,6 @@ export default function AdminAttendance() {
         todayKey={getTodayDayKeyInWeek(weekStart)}
         weekStart={weekStart}
       />
-
-      {saveError && <Alert variant="error">{saveError}</Alert>}
 
       {dayLessons.length === 0 ? (
         <div className="flex min-h-48 flex-col items-center justify-center gap-2 rounded-box border border-dashed border-base-300 bg-base-100 p-8 text-center text-base-content/60">
@@ -231,8 +227,6 @@ export default function AdminAttendance() {
           editable={editable}
           blockTitle={!editable ? 'Dars hali boshlanmagan.' : undefined}
           blockMessage="Davomatni dars boshlangandan keyin belgilash yoki tahrirlash mumkin."
-          savedBanner={savedBanner}
-          onDismissSaved={() => setSavedBanner(false)}
           onStatusChange={handleStatusChange}
           onMarkAllPresent={handleMarkAllPresent}
           onSave={handleSave}
