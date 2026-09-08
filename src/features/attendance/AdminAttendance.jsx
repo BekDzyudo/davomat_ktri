@@ -97,7 +97,7 @@ export default function AdminAttendance() {
     listAttendanceFor({ scheduleId: selectedLesson.id, date: lessonDateIso })
       .then((data) => {
         if (cancelled) return
-        setRecords(Object.fromEntries(data.map((r) => [r.studentId, { status: r.status, reasonText: r.reasonText }])))
+        setRecords(Object.fromEntries(data.map((r) => [r.studentId, { status: r.status, reasonText: r.reasonText, reasonFile: r.reasonFile }])))
         setPendingFiles({})
       })
       .catch((err) => {
@@ -156,7 +156,7 @@ export default function AdminAttendance() {
       }
 
       setRecords(
-        Object.fromEntries(refreshed.map((r) => [r.studentId, { status: r.status, reasonText: r.reasonText }])),
+        Object.fromEntries(refreshed.map((r) => [r.studentId, { status: r.status, reasonText: r.reasonText, reasonFile: r.reasonFile }])),
       )
       setPendingFiles({})
       toast.success('Davomat saqlandi.')
@@ -238,6 +238,7 @@ export default function AdminAttendance() {
         <ExcuseModal
           student={excuseTarget}
           initialReason={records[excuseTarget.id]?.reasonText}
+          initialFileName={records[excuseTarget.id]?.reasonFile?.split('/').pop()}
           onClose={() => setExcuseTarget(null)}
           onConfirm={handleExcuseConfirm}
         />

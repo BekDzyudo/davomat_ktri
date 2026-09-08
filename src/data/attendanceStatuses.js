@@ -16,14 +16,6 @@ export const ATTENDANCE_STATUSES = [
     chartColor: 'var(--color-error)',
   },
   {
-    key: 'kech_qoldi',
-    label: "Kech qoldi",
-    icon: 'clock',
-    active: 'border-warning bg-warning text-warning-content shadow-sm',
-    idle: 'border-base-300 text-base-content/60 hover:border-warning/40 hover:bg-warning/10 hover:text-warning',
-    chartColor: 'var(--color-warning)',
-  },
-  {
     key: 'sababli',
     label: 'Sababli',
     icon: 'fileText',

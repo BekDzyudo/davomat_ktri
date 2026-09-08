@@ -142,7 +142,7 @@ export default function TeacherAttendance() {
   const lessonKey = selectedLesson ? `${selectedLesson.id}:${isLoaded ? 'loaded' : 'pending'}` : null
   if (lessonKey !== syncedLessonKey) {
     setSyncedLessonKey(lessonKey)
-    setRecords(Object.fromEntries(savedRecords.map((r) => [r.studentId, { status: r.status, reasonText: r.reasonText }])))
+    setRecords(Object.fromEntries(savedRecords.map((r) => [r.studentId, { status: r.status, reasonText: r.reasonText, reasonFile: r.reasonFile }])))
     setPendingFiles({})
   }
 
@@ -203,7 +203,7 @@ export default function TeacherAttendance() {
       }
 
       setRecordsByLesson((prev) => ({ ...prev, [selectedLesson.id]: refreshed }))
-      setRecords(Object.fromEntries(refreshed.map((r) => [r.studentId, { status: r.status, reasonText: r.reasonText }])))
+      setRecords(Object.fromEntries(refreshed.map((r) => [r.studentId, { status: r.status, reasonText: r.reasonText, reasonFile: r.reasonFile }])))
       setPendingFiles({})
       // Bildirishnomada belgilash oynasi qachon ochilgani/yopilishi va shu
       // vaqtgacha tahrirlash mumkinligi ham ko'rsatiladi.
@@ -346,6 +346,7 @@ export default function TeacherAttendance() {
         <ExcuseModal
           student={excuseTarget}
           initialReason={records[excuseTarget.id]?.reasonText}
+          initialFileName={records[excuseTarget.id]?.reasonFile?.split('/').pop()}
           onClose={() => setExcuseTarget(null)}
           onConfirm={handleExcuseConfirm}
         />

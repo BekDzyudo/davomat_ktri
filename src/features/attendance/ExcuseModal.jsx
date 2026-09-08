@@ -16,6 +16,10 @@ export default function ExcuseModal({ student, initialReason, initialFileName, o
       setError('Sababni kiriting')
       return
     }
+    if (!fileName) {
+      setError('Faylni (spravka) biriktiring')
+      return
+    }
     onConfirm({ reason: reason.trim(), fileName, file })
   }
 
@@ -47,7 +51,7 @@ export default function ExcuseModal({ student, initialReason, initialFileName, o
             name="upload"
             className="size-4 shrink-0 text-base-content/60 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:text-primary"
           />
-          <span className="truncate">{fileName || 'Spravka (fayl) biriktirish — ixtiyoriy'}</span>
+          <span className="truncate">{fileName || 'Spravka (fayl) biriktirish'}</span>
           <input
             type="file"
             className="hidden"
@@ -55,6 +59,7 @@ export default function ExcuseModal({ student, initialReason, initialFileName, o
               const picked = e.target.files?.[0] ?? null
               setFile(picked)
               setFileName(picked?.name ?? '')
+              setError('')
             }}
           />
         </label>
