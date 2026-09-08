@@ -63,6 +63,16 @@ export function formatDate(date) {
   return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`
 }
 
+// Backend'dan kelgan ISO datetime'dan (masalan "2026-09-04T08:55:00+05:00")
+// faqat mahalliy vaqt qismini "HH:MM:SS" ko'rinishida chiqaradi — Face ID
+// kirish/chiqish vaqtini ko'rsatish uchun (`AttendanceCalendarModal`).
+export function formatTimeOfDay(isoDateTime) {
+  if (!isoDateTime) return null
+  const d = new Date(isoDateTime)
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+}
+
 // /api/reports/* dan keladigan "period" qiymatini ("2026-09" yoki "2026-09-01")
 // o'qish uchun qulay yorliqqa aylantiradi.
 export function formatPeriodLabel(period) {

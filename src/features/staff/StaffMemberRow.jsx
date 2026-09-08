@@ -96,7 +96,9 @@ export default function StaffMemberRow({ member }) {
         <Icon name="pencil" className="size-3" />
       </button>
 
-      {modalOpen && <AttendanceCalendarModal member={member} onClose={() => setModalOpen(false)} />}
+      {modalOpen && (
+        <AttendanceCalendarModal member={member} staffId={member.staffId} onClose={() => setModalOpen(false)} />
+      )}
     </div>
   )
 }

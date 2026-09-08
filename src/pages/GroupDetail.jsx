@@ -299,7 +299,9 @@ export default function GroupDetail() {
             id: `student-${attendanceTarget.id}`,
             name: attendanceTarget.fullName,
             position: attendanceTarget.institution || `ID: ${attendanceTarget.externalId || '—'}`,
+            avatar: attendanceTarget.photo || undefined,
           }}
+          studentId={attendanceTarget.id}
           showWorkStats={false}
           onClose={() => setAttendanceTarget(null)}
         />

@@ -61,3 +61,44 @@ export async function uploadExcuseFile(attendanceId, file) {
   const data = await apiFetch(`/api/attendance/${attendanceId}/`, { method: 'PATCH', formData })
   return mapAttendanceFromApi(data)
 }
+
+function mapCalendarDayFromApi(day) {
+  return {
+    status: day.status,
+    entryTime: day.entry_time,
+    exitTime: day.exit_time,
+    entryPhoto: day.entry_photo,
+    exitPhoto: day.exit_photo,
+    // "Umumiy manzara surati" — admin paneldagi kabi to'liq kadr (kattaroq
+    // ko'rinish uchun, kesilgan yuz suratidan farqli).
+    entryScenePhoto: day.entry_scene_photo,
+    exitScenePhoto: day.exit_scene_photo,
+    events: (day.events ?? []).map((e) => ({
+      time: e.time,
+      direction: e.direction, // 'entry' | 'exit'
+      photo: e.photo,
+      scenePhoto: e.scene_photo,
+    })),
+  }
+}
+
+/**
+ * Bitta talabaning bir oylik davomat taqvimi — `AttendanceCalendarModal` uchun.
+ * `{"YYYY-MM-DD": {status, entryTime, exitTime, entryPhoto, exitPhoto, events}}`
+ * lug'atini qaytaradi — Attendance yozuvi yo'q kunlar (dam olish/kelajak/dars
+ * yo'q) natijada UMUMAN bo'lmaydi (frontend buni "status: null" deb talqin qiladi).
+ */
+export async function getStudentCalendar(studentId, year, month) {
+  const data = await apiFetch('/api/attendance/calendar/', { params: { student: studentId, year, month } })
+  return Object.fromEntries(Object.entries(data.days ?? {}).map(([iso, day]) => [iso, mapCalendarDayFromApi(day)]))
+}
+
+/**
+ * Bitta xodimning bir oylik davomat taqvimi — `getStudentCalendar` bilan bir
+ * xil shaklda, lekin xodim uchun (dars jadvaliga emas, fiksirlangan 09:00–18:00
+ * ish vaqtiga bog'liq holat hisoblanadi).
+ */
+export async function getStaffCalendar(staffId, year, month) {
+  const data = await apiFetch('/api/attendance/calendar/', { params: { staff: staffId, year, month } })
+  return Object.fromEntries(Object.entries(data.days ?? {}).map(([iso, day]) => [iso, mapCalendarDayFromApi(day)]))
+}

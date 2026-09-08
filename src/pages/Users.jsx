@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { createUser, deleteUser, listUsers, updateUser } from '../api/users'
 import { ApiError } from '../api/client'
+import AttendanceCalendarModal from '../components/AttendanceCalendarModal'
 import ConfirmDialog from '../components/ConfirmDialog'
 import Alert from '../components/form/Alert'
 import Button from '../components/form/Button'
@@ -38,6 +39,7 @@ export default function Users() {
   const [modalState, setModalState] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [actionError, setActionError] = useState('')
+  const [attendanceTarget, setAttendanceTarget] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -227,8 +229,15 @@ export default function Users() {
                 </tr>
               </thead>
               <tbody>
-                {pageItems.map((user, index) => (
-                  <tr key={user.id} className="group border-b border-base-200 transition-colors hover:bg-primary/[0.035]">
+                {pageItems.map((user, index) => {
+                  const isStudent = user.role === 'student' && !!user.studentProfileId
+                  return (
+                  <tr
+                    key={user.id}
+                    onClick={isStudent ? () => setAttendanceTarget(user) : undefined}
+                    title={isStudent ? 'Davomat taqvimini ko\'rish' : undefined}
+                    className={`group border-b border-base-200 transition-colors hover:bg-primary/[0.035] ${isStudent ? 'cursor-pointer' : ''}`}
+                  >
                     <td className="text-xs font-semibold text-base-content/35">{(page - 1) * pageSize + index + 1}</td>
                     <td>
                       <div className="flex min-w-0 items-center gap-3">
@@ -262,18 +271,25 @@ export default function Users() {
                           icon="pencil"
                           label="Tahrirlash"
                           variant="edit"
-                          onClick={() => setModalState({ mode: 'edit', user })}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setModalState({ mode: 'edit', user })
+                          }}
                         />
                         <RowActionButton
                           icon="trash"
                           label="O'chirish"
                           variant="danger"
-                          onClick={() => setDeleteTarget(user)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setDeleteTarget(user)
+                          }}
                         />
                       </div>
                     </td>
                   </tr>
-                ))}
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -295,6 +311,20 @@ export default function Users() {
           initialValue={modalState.user}
           onClose={() => setModalState(null)}
           onSubmit={handleSubmit}
+        />
+      )}
+
+      {attendanceTarget && (
+        <AttendanceCalendarModal
+          member={{
+            id: `student-${attendanceTarget.studentProfileId}`,
+            name: attendanceTarget.fullName,
+            position: ROLE_LABELS[attendanceTarget.role],
+            avatar: attendanceTarget.photo || undefined,
+          }}
+          studentId={attendanceTarget.studentProfileId}
+          showWorkStats={false}
+          onClose={() => setAttendanceTarget(null)}
         />
       )}
 

@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { getStaffCalendar, getStudentCalendar } from '../api/attendance'
 import Icon from './Icon'
 import {
   buildMonthGrid,
@@ -9,13 +10,18 @@ import {
   STAFF_DAY_STATUS,
   STAFF_STATUS_LEGEND,
 } from '../data/mockAttendanceCalendar'
-import { formatDate, toIsoDate } from '../utils/date'
+import { formatDate, formatTimeOfDay, toIsoDate } from '../utils/date'
 
 const WEEKDAY_LABELS = ['DU', 'SE', 'CH', 'PA', 'JU', 'SH', 'YA']
 const UZ_MONTHS_CAP = [
   'Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun',
   'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr',
 ]
+
+const DIRECTION_LABELS = {
+  entry: { text: '↓ Kirish', className: 'text-success', dot: 'bg-success ring-success', ring: 'border-success/20' },
+  exit: { text: '↑ Chiqish', className: 'text-error', dot: 'bg-error ring-error', ring: 'border-error/20' },
+}
 
 function memberInitials(name) {
   return name
@@ -27,26 +33,115 @@ function memberInitials(name) {
     .toUpperCase()
 }
 
-function MemberAvatar({ member, className = 'size-11' }) {
-  return (
-    <span className={`flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-xs font-black text-primary ${className}`}>
-      {member.avatar ? (
-        <img src={member.avatar} alt="" className="size-full object-cover" />
-      ) : (
-        memberInitials(member.name)
-      )}
-    </span>
-  )
+/**
+ * `scenePhoto` berilsa (Face ID kamerasining "umumiy manzara surati" —
+ * turniket/eshik oldidagi to'liq kadr, admin paneldagi kabi) — avatar
+ * bosiladigan bo'ladi, bosilganda `onOpenPhoto(scenePhoto)` chaqiriladi
+ * (kattaroq ko'rinishni ochish uchun).
+ */
+function MemberAvatar({ member, className = 'size-11', photoUrl, scenePhoto, onOpenPhoto }) {
+  const src = photoUrl || member.avatar
+  const content = src ? <img src={src} alt="" className="size-full object-cover" /> : memberInitials(member.name)
+  const baseClass = `flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-xs font-black text-primary ${className}`
+
+  if (scenePhoto) {
+    return (
+      <button
+        type="button"
+        onClick={() => onOpenPhoto?.(scenePhoto)}
+        title="Umumiy manzara suratini ko'rish"
+        className={`${baseClass} cursor-zoom-in transition-transform hover:scale-105`}
+      >
+        {content}
+      </button>
+    )
+  }
+
+  return <span className={baseClass}>{content}</span>
 }
 
-export default function AttendanceCalendarModal({ member, onClose, showWorkStats = true }) {
+/**
+ * `studentId` YOKI `staffId`dan biri berilsa — taqvim mock (soxta) ma'lumot
+ * o'rniga haqiqiy Face ID davomat ma'lumotini (`GET /api/attendance/calendar/`)
+ * ko'rsatadi (oy o'zgarganda qayta so'raladi; ikkalasi ham berilmasa —
+ * avvalgidek `mockAttendanceCalendar`dan foydalanadi, masalan real ma'lumotga
+ * hali ulanmagan holatlar uchun).
+ */
+export default function AttendanceCalendarModal({ member, onClose, showWorkStats = true, studentId, staffId }) {
   const [monthDate, setMonthDate] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1))
   const [selectedDate, setSelectedDate] = useState(null)
+  const [apiDays, setApiDays] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [loadError, setLoadError] = useState('')
+  const [lightboxPhoto, setLightboxPhoto] = useState(null)
 
+  const isRealData = !!(studentId || staffId)
   const year = monthDate.getFullYear()
   const month = monthDate.getMonth()
   const cells = buildMonthGrid(year, month)
-  const selectedInfo = selectedDate ? getStaffDayInfo(member, selectedDate) : null
+
+  useEffect(() => {
+    if (!isRealData) return undefined
+    let cancelled = false
+    // Oy/talaba/xodim o'zgarganda darhol "yuklanmoqda" holatini ko'rsatish
+    // uchun — bu effekt ichida ma'lumot so'ralayotgan paytdagi standart
+    // andoza (React hujjatlaridagi "fetch on id/dep change" namunasi bilan
+    // bir xil).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsLoading(true)
+    setLoadError('')
+    const request = studentId
+      ? getStudentCalendar(studentId, year, month + 1)
+      : getStaffCalendar(staffId, year, month + 1)
+    request
+      .then((days) => {
+        if (!cancelled) setApiDays(days)
+      })
+      .catch((err) => {
+        if (!cancelled) setLoadError(err.message ?? "Davomat taqvimini yuklab bo'lmadi")
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [studentId, staffId, isRealData, year, month])
+
+  const dayInfo = (date) => {
+    if (!isRealData) return getStaffDayInfo(member, date)
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const cmp = new Date(date)
+    cmp.setHours(0, 0, 0, 0)
+    const weekday = date.getDay()
+    const isWeekend = weekday === 0 || weekday === 6
+    const isFuture = cmp.getTime() > today.getTime()
+    const isToday = cmp.getTime() === today.getTime()
+
+    const apiInfo = apiDays?.[toIsoDate(date)]
+    if (!apiInfo) return { date, isWeekend, isFuture, isToday, status: null }
+
+    return {
+      date,
+      isWeekend,
+      isFuture,
+      isToday,
+      status: apiInfo.status,
+      checkIn: formatTimeOfDay(apiInfo.entryTime),
+      checkOut: formatTimeOfDay(apiInfo.exitTime),
+      entryPhoto: apiInfo.entryPhoto,
+      exitPhoto: apiInfo.exitPhoto,
+      entryScenePhoto: apiInfo.entryScenePhoto,
+      exitScenePhoto: apiInfo.exitScenePhoto,
+      events: apiInfo.events,
+      netWorkMinutes: 0,
+      overtimeMinutes: 0,
+    }
+  }
+
+  const selectedInfo = selectedDate ? dayInfo(selectedDate) : null
 
   const changeMonth = (delta) => {
     setMonthDate(new Date(year, month + delta, 1))
@@ -93,8 +188,9 @@ export default function AttendanceCalendarModal({ member, onClose, showWorkStats
                 <Icon name="chevronLeft" className="size-4" />
                 Oldingi
               </button>
-              <span className="text-xl font-extrabold tracking-tight text-base-content">
+              <span className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-base-content">
                 {UZ_MONTHS_CAP[month]}, {year}
+                {isLoading && <span className="loading loading-spinner loading-xs text-base-content/40" />}
               </span>
               <button
                 type="button"
@@ -105,6 +201,13 @@ export default function AttendanceCalendarModal({ member, onClose, showWorkStats
                 <Icon name="chevronRight" className="size-4" />
               </button>
             </div>
+
+            {loadError && (
+              <p className="mb-3 flex items-center gap-1.5 rounded-box border border-error/30 bg-error/10 px-3 py-2 text-xs font-medium text-error">
+                <Icon name="alertCircle" className="size-3.5 shrink-0" />
+                {loadError}
+              </p>
+            )}
 
             <div className="grid grid-cols-7 gap-2 text-center sm:gap-2">
               {WEEKDAY_LABELS.map((label, i) => (
@@ -117,9 +220,17 @@ export default function AttendanceCalendarModal({ member, onClose, showWorkStats
               ))}
               {cells.map((date, i) => {
                 if (!date) return <span key={i} />
-                const info = getStaffDayInfo(member, date)
+                const info = dayInfo(date)
                 const isSelected = !!selectedDate && toIsoDate(selectedDate) === toIsoDate(date)
-                const disabled = !info.status
+                // `status` bo'lmasa ham (masalan darsga aloqasi bo'lmagan
+                // vaqtda kirish/chiqish qayd etilgan bo'lsa), kirish/chiqish
+                // ma'lumoti bo'lsa katak baribir bosiladigan qilinadi.
+                const disabled = !info.status && !info.checkIn && !info.checkOut
+                // Darsga aloqasi bo'lmagan (masalan darsdan tashqari vaqtdagi)
+                // kirish/chiqish — rasmiy holat yo'q, lekin ma'lumot bor: buni
+                // 4 ta rasmiy holatdan (vaqtida/kech.../kelmagan) ajratib
+                // ko'rsatish kerak.
+                const presenceOnly = !info.status && !disabled
 
                 return (
                   <button
@@ -131,7 +242,9 @@ export default function AttendanceCalendarModal({ member, onClose, showWorkStats
                       'flex aspect-square items-center justify-center rounded-xl text-lg font-extrabold transition-all duration-150 sm:rounded-xl',
                       disabled
                         ? 'cursor-default bg-base-200 text-base-content/30'
-                        : `cursor-pointer hover:-translate-y-0.5 hover:shadow-md active:scale-95 ${staffStatusCellClass(info.status)}`,
+                        : presenceOnly
+                          ? 'cursor-pointer border-2 border-info/50 bg-info/10 text-info hover:-translate-y-0.5 hover:shadow-md active:scale-95'
+                          : `cursor-pointer hover:-translate-y-0.5 hover:shadow-md active:scale-95 ${staffStatusCellClass(info.status)}`,
                       isSelected ? 'ring-2 ring-base-content/60 ring-offset-2 ring-offset-base-100' : '',
                     ].join(' ')}
                   >
@@ -148,6 +261,12 @@ export default function AttendanceCalendarModal({ member, onClose, showWorkStats
                   {s.label}
                 </span>
               ))}
+              {isRealData && (
+                <span className="flex items-center gap-1.5 text-xs font-medium text-base-content/70">
+                  <span className="size-2 rounded-full bg-info" />
+                  Faqat kirish/chiqish (holat hisoblanmagan)
+                </span>
+              )}
             </div>
           </div>
 
@@ -179,15 +298,27 @@ export default function AttendanceCalendarModal({ member, onClose, showWorkStats
                     <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-success px-3 py-1 text-[10px] font-black uppercase leading-none text-white shadow-sm">
                       Birinchi kirish
                     </span>
-                    <MemberAvatar member={member} className="size-16 border-2 border-success/20" />
-                    <p className="whitespace-nowrap text-2xl font-black tabular-nums tracking-tight text-base-content">{selectedInfo.checkIn}</p>
+                    <MemberAvatar
+                      member={member}
+                      photoUrl={selectedInfo.entryPhoto}
+                      scenePhoto={selectedInfo.entryScenePhoto}
+                      onOpenPhoto={setLightboxPhoto}
+                      className="size-16 border-2 border-success/20"
+                    />
+                    <p className="whitespace-nowrap text-2xl font-black tabular-nums tracking-tight text-base-content">{selectedInfo.checkIn ?? '—'}</p>
                   </div>
                   <div className="relative mt-2 flex flex-col items-center gap-2 rounded-2xl border border-base-300 bg-base-100 px-3 pb-4 pt-6 shadow-sm">
                     <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-error px-3 py-1 text-[10px] font-black uppercase leading-none text-white shadow-sm">
                       So'nggi chiqish
                     </span>
-                    <MemberAvatar member={member} className="size-16 border-2 border-error/20" />
-                    <p className="whitespace-nowrap text-2xl font-black tabular-nums tracking-tight text-base-content">{selectedInfo.checkOut}</p>
+                    <MemberAvatar
+                      member={member}
+                      photoUrl={selectedInfo.exitPhoto}
+                      scenePhoto={selectedInfo.exitScenePhoto}
+                      onOpenPhoto={setLightboxPhoto}
+                      className="size-16 border-2 border-error/20"
+                    />
+                    <p className="whitespace-nowrap text-2xl font-black tabular-nums tracking-tight text-base-content">{selectedInfo.checkOut ?? '—'}</p>
                   </div>
                 </div>
 
@@ -219,30 +350,80 @@ export default function AttendanceCalendarModal({ member, onClose, showWorkStats
                     <Icon name="clock" className="size-3.5" />
                     Barcha harakatlar
                   </p>
-                  <div className="relative flex flex-col gap-2 pl-4 before:absolute before:bottom-3 before:left-0.75 before:top-3 before:w-px before:bg-base-300">
-                    <div className="relative flex items-center gap-2.5 rounded-xl border border-base-300 bg-base-100 p-2.5 shadow-sm">
-                      <span className="absolute left-[-1.05rem] size-2.5 rounded-full border-2 border-base-100 bg-success ring-1 ring-success" />
-                      <MemberAvatar member={member} className="size-9 border border-success/20" />
-                      <div className="min-w-0 leading-tight">
-                        <p className="text-base font-extrabold tabular-nums text-base-content">{selectedInfo.checkIn}</p>
-                        <p className="text-xs font-bold text-success">↓ Kirish</p>
+                  {isRealData ? (
+                    selectedInfo.events?.length > 0 ? (
+                      <div className="relative flex flex-col gap-2 pl-4 before:absolute before:bottom-3 before:left-0.75 before:top-3 before:w-px before:bg-base-300">
+                        {selectedInfo.events.map((event, idx) => {
+                          const label = DIRECTION_LABELS[event.direction] ?? DIRECTION_LABELS.entry
+                          return (
+                            <div key={`${event.time}-${idx}`} className="relative flex items-center gap-2.5 rounded-xl border border-base-300 bg-base-100 p-2.5 shadow-sm">
+                              <span className={`absolute left-[-1.05rem] size-2.5 rounded-full border-2 border-base-100 ring-1 ${label.dot}`} />
+                              <MemberAvatar
+                                member={member}
+                                photoUrl={event.photo}
+                                scenePhoto={event.scenePhoto}
+                                onOpenPhoto={setLightboxPhoto}
+                                className={`size-9 border ${label.ring}`}
+                              />
+                              <div className="min-w-0 leading-tight">
+                                <p className="text-base font-extrabold tabular-nums text-base-content">{formatTimeOfDay(event.time)}</p>
+                                <p className={`text-xs font-bold ${label.className}`}>{label.text}</p>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-base-content/50">Bu kun uchun Face ID hodisalari qayd etilmagan.</p>
+                    )
+                  ) : (
+                    <div className="relative flex flex-col gap-2 pl-4 before:absolute before:bottom-3 before:left-0.75 before:top-3 before:w-px before:bg-base-300">
+                      <div className="relative flex items-center gap-2.5 rounded-xl border border-base-300 bg-base-100 p-2.5 shadow-sm">
+                        <span className="absolute left-[-1.05rem] size-2.5 rounded-full border-2 border-base-100 bg-success ring-1 ring-success" />
+                        <MemberAvatar member={member} className="size-9 border border-success/20" />
+                        <div className="min-w-0 leading-tight">
+                          <p className="text-base font-extrabold tabular-nums text-base-content">{selectedInfo.checkIn}</p>
+                          <p className="text-xs font-bold text-success">↓ Kirish</p>
+                        </div>
+                      </div>
+                      <div className="relative flex items-center gap-2.5 rounded-xl border border-base-300 bg-base-100 p-2.5 shadow-sm">
+                        <span className="absolute left-[-1.05rem] size-2.5 rounded-full border-2 border-base-100 bg-error ring-1 ring-error" />
+                        <MemberAvatar member={member} className="size-9 border border-error/20" />
+                        <div className="min-w-0 leading-tight">
+                          <p className="text-base font-extrabold tabular-nums text-base-content">{selectedInfo.checkOut}</p>
+                          <p className="text-xs font-bold text-error">↑ Chiqish</p>
+                        </div>
                       </div>
                     </div>
-                    <div className="relative flex items-center gap-2.5 rounded-xl border border-base-300 bg-base-100 p-2.5 shadow-sm">
-                      <span className="absolute left-[-1.05rem] size-2.5 rounded-full border-2 border-base-100 bg-error ring-1 ring-error" />
-                      <MemberAvatar member={member} className="size-9 border border-error/20" />
-                      <div className="min-w-0 leading-tight">
-                        <p className="text-base font-extrabold tabular-nums text-base-content">{selectedInfo.checkOut}</p>
-                        <p className="text-xs font-bold text-error">↑ Chiqish</p>
-                      </div>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </>
             )}
           </div>
         </div>
       </div>
+
+      {lightboxPhoto && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setLightboxPhoto(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxPhoto(null)}
+            aria-label="Yopish"
+            className="absolute right-4 top-4 flex size-9 items-center justify-center rounded-lg bg-white/10 text-white transition-colors hover:bg-white/20"
+          >
+            <Icon name="x" className="size-5" />
+          </button>
+          <img
+            src={lightboxPhoto}
+            alt="Umumiy manzara surati"
+            className="max-h-full max-w-full rounded-lg object-contain shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
     ),
     document.body,

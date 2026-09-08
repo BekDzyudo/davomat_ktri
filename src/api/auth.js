@@ -14,6 +14,7 @@ export function mapUserFromApi(u) {
     faculty: u.faculty,
     isActive: u.is_active,
     dateJoined: u.date_joined,
+    studentProfileId: u.student_profile_id ?? null,
   }
 }
 

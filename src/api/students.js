@@ -10,6 +10,7 @@ function mapStudentFromApi(s) {
     institution: s.institution_name ?? '',
     isActive: s.is_active,
     userId: s.user,
+    photo: s.face_photo || null,
   }
 }
 
