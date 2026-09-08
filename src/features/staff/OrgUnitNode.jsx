@@ -16,19 +16,19 @@ export default function OrgUnitNode({ node }) {
       <div className="flex flex-wrap items-center justify-center">
         {sideUnits[0] && (
           <div className="flex items-center">
-            <div className="w-80 shrink-0">
+            <div className="w-88 shrink-0">
               <UnitBox node={sideUnits[0]} depth={1} collapsibleMembers />
             </div>
             <div className="h-1 w-8 shrink-0 rounded-full bg-primary" />
           </div>
         )}
-        <div className="w-96 shrink-0">
+        <div className="w-104 shrink-0">
           <UnitBox node={node} depth={0} />
         </div>
         {sideUnits[1] && (
           <div className="flex items-center">
             <div className="h-1 w-8 shrink-0 rounded-full bg-primary" />
-            <div className="w-80 shrink-0">
+            <div className="w-88 shrink-0">
               <UnitBox node={sideUnits[1]} depth={1} collapsibleMembers />
             </div>
           </div>
@@ -126,7 +126,7 @@ function Branch({ nodes, depth }) {
               ref={(el) => {
                 boxRefs.current[node.id] = el
               }}
-              className="w-80 shrink-0"
+              className="w-88 shrink-0"
             >
               <UnitBox
                 node={node}
@@ -160,7 +160,7 @@ function Branch({ nodes, depth }) {
               {displayRealChildren.length > 0 ? (
                 <Branch nodes={displayRealChildren} depth={depth + 1} />
               ) : (
-                <div className="w-80 rounded-xl border border-dashed border-base-300 bg-base-200/50 px-4 py-3 text-center text-xs text-base-content/50">
+                <div className="w-88 rounded-xl border border-dashed border-base-300 bg-base-200/50 px-4 py-3 text-center text-xs text-base-content/50">
                   Bu bo'lim ma'lumotlari hali kiritilmagan.
                 </div>
               )}

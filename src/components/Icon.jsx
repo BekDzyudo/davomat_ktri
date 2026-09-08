@@ -56,6 +56,8 @@ const paths = {
     'M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.45 1 1.2 1 2.05V17h6v-.25c0-.85.4-1.6 1-2.05A7 7 0 0 0 12 2Z',
   alertCircle: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM12 8v5M12 16h.01',
   sitemap: 'M9 3h6v4H9ZM4 17h6v4H4ZM14 17h6v4h-6ZM12 7v3H7v7M12 10h5v7',
+  briefcase:
+    'M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8ZM8 6V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1M3 12h18',
 }
 
 export default function Icon({ name, className = 'size-5', strokeWidth = 2.25 }) {

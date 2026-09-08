@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { listFaculties } from '../api/faculties'
 import { listGroups } from '../api/groups'
 import { createStudent, deleteAllStudents, deleteStudent, importStudentsExcel, listStudents } from '../api/students'
+import AttendanceCalendarModal from '../components/AttendanceCalendarModal'
 import Badge from '../components/Badge'
 import ConfirmDialog from '../components/ConfirmDialog'
 import Alert from '../components/form/Alert'
@@ -50,6 +51,7 @@ export default function GroupDetail() {
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [isUploadOpen, setIsUploadOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [attendanceTarget, setAttendanceTarget] = useState(null)
   const [deleteAllOpen, setDeleteAllOpen] = useState(false)
   const [isDeletingAll, setIsDeletingAll] = useState(false)
   const [actionError, setActionError] = useState('')
@@ -244,7 +246,11 @@ export default function GroupDetail() {
               </thead>
               <tbody>
                 {pageItems.map((student, index) => (
-                  <tr key={student.id}>
+                  <tr
+                    key={student.id}
+                    onClick={() => setAttendanceTarget(student)}
+                    className="cursor-pointer hover:bg-base-200/60"
+                  >
                     <td className="text-base-content/40">{(page - 1) * pageSize + index + 1}</td>
                     <td className="text-base-content/50">{student.externalId || '—'}</td>
                     <td className="font-medium text-base-content">{student.fullName}</td>
@@ -261,7 +267,10 @@ export default function GroupDetail() {
                           icon="trash"
                           label="O'chirish"
                           variant="danger"
-                          onClick={() => setDeleteTarget(student)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setDeleteTarget(student)
+                          }}
                         />
                       </div>
                     </td>
@@ -283,6 +292,18 @@ export default function GroupDetail() {
 
       <StudentFormModal open={isAddOpen} onClose={() => setIsAddOpen(false)} onSubmit={handleAddStudent} />
       <ExcelUploadModal open={isUploadOpen} onClose={() => setIsUploadOpen(false)} onUpload={handleUpload} />
+
+      {attendanceTarget && (
+        <AttendanceCalendarModal
+          member={{
+            id: `student-${attendanceTarget.id}`,
+            name: attendanceTarget.fullName,
+            position: attendanceTarget.institution || `ID: ${attendanceTarget.externalId || '—'}`,
+          }}
+          showWorkStats={false}
+          onClose={() => setAttendanceTarget(null)}
+        />
+      )}
 
       <ConfirmDialog
         open={!!deleteTarget}

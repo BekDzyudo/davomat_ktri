@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import Icon from '../../components/Icon'
+import AttendanceCalendarModal from '../../components/AttendanceCalendarModal'
 
 const AVATAR_PALETTE = [
   'bg-primary/15 text-primary',
@@ -30,35 +32,51 @@ function paletteFor(name) {
 export default function StaffMemberRow({ member }) {
   const present = !!member.checkIn
   const late = present && member.checkIn > '09:00'
+  const [modalOpen, setModalOpen] = useState(false)
 
   return (
     <div
+      role="button"
+      tabIndex={0}
+      onClick={() => setModalOpen(true)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          setModalOpen(true)
+        }
+      }}
       className={[
-        'flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors',
+        'flex min-w-0 cursor-pointer items-center gap-2 rounded-lg border px-2.5 py-2 shadow-none transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm',
         present ? 'border-success/20 bg-success/10' : 'border-error/20 bg-error/10',
       ].join(' ')}
     >
       <span className="relative shrink-0">
         <span
-          className={`flex size-9 items-center justify-center rounded-full text-xs font-bold ${paletteFor(member.name)}`}
+          className="flex size-8 items-center justify-center overflow-hidden rounded-full text-[12px] font-bold"
         >
-          {initials(member.name)}
+          {member.avatar ? (
+            <img src={member.avatar} alt="" className="size-full object-cover" />
+          ) : (
+            <span className={`flex size-full items-center justify-center ${paletteFor(member.name)}`}>
+              {initials(member.name)}
+            </span>
+          )}
         </span>
         {present && (
           <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-base-100 bg-success" />
         )}
       </span>
 
-      <div className="min-w-0 flex-1">
-        <p className="wrap-break-word text-sm font-semibold leading-tight text-base-content">{member.name}</p>
-        <p className="wrap-break-word text-xs leading-tight text-base-content/60">{member.position}</p>
+      <div className="min-w-0 flex-1 leading-tight">
+        <p className="truncate text-[14px] font-semibold text-base-content" title={member.name}>{member.name}</p>
+        <p className="truncate text-[12px] text-base-content/60" title={member.position}>{member.position}</p>
       </div>
 
       {present && (
         <span
           className={[
-            'flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-xs font-bold',
-            late ? 'bg-warning text-warning-content' : 'bg-success text-success-content',
+            'flex shrink-0 items-center gap-0.5 rounded-md px-1.5 py-1 text-[12px] font-bold text-white',
+            late ? 'bg-warning' : 'bg-success',
           ].join(' ')}
         >
           <Icon name="clock" className="size-3" />
@@ -69,10 +87,16 @@ export default function StaffMemberRow({ member }) {
       <button
         type="button"
         aria-label="Tahrirlash"
-        className="flex size-7 shrink-0 items-center justify-center rounded-full text-base-content/40 transition-colors hover:bg-base-content/10 hover:text-base-content"
+        onClick={(e) => {
+          e.stopPropagation()
+          setModalOpen(true)
+        }}
+        className="flex size-6 shrink-0 items-center justify-center rounded-md text-base-content/40 transition-colors hover:bg-base-content/10 hover:text-base-content"
       >
-        <Icon name="pencil" className="size-3.5" />
+        <Icon name="pencil" className="size-3" />
       </button>
+
+      {modalOpen && <AttendanceCalendarModal member={member} onClose={() => setModalOpen(false)} />}
     </div>
   )
 }
