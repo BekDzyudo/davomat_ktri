@@ -119,9 +119,10 @@ export default function GroupDetail() {
   }
 
   const handleUpload = async (file) => {
-    await importStudentsExcel(groupId, file)
+    const result = await importStudentsExcel(groupId, file)
     await loadStudents()
     showSuccess("Guruh a'zolari muvaffaqiyatli yuklandi")
+    return result
   }
 
   const handleDelete = async () => {

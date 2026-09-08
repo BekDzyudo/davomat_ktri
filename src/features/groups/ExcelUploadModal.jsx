@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Alert from '../../components/form/Alert'
 import Button from '../../components/form/Button'
+import ExcelUploadResult from '../../components/ExcelUploadResult'
 import Icon from '../../components/Icon'
 import Modal from '../../components/Modal'
 import { downloadCsv } from '../../utils/csv'
@@ -32,6 +33,8 @@ export default function ExcelUploadModal({ open, onClose, onUpload }) {
   const [isUploading, setIsUploading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState('')
+  const [rowErrors, setRowErrors] = useState([])
+  const [rowWarnings, setRowWarnings] = useState([])
   const [success, setSuccess] = useState(false)
   const closeTimerRef = useRef(null)
 
@@ -43,6 +46,8 @@ export default function ExcelUploadModal({ open, onClose, onUpload }) {
     setShowSample(false)
     setIsDragging(false)
     setError('')
+    setRowErrors([])
+    setRowWarnings([])
     setSuccess(false)
     onClose()
   }
@@ -51,12 +56,27 @@ export default function ExcelUploadModal({ open, onClose, onUpload }) {
     if (!file) return
     setIsUploading(true)
     setError('')
+    setRowErrors([])
     try {
-      await onUpload(file)
+      const result = await onUpload(file)
+      const warnings = result?.warnings ?? []
+      setRowWarnings(warnings)
       setSuccess(true)
-      closeTimerRef.current = setTimeout(handleClose, 1200)
+      // Ogohlantirish bo'lmasa avvalgidek tez yopiladi; bo'lsa — foydalanuvchi
+      // o'qib chiqishi uchun avtomatik yopilmaydi, o'zi "Yopish"ni bosadi.
+      if (warnings.length === 0) {
+        closeTimerRef.current = setTimeout(handleClose, 1200)
+      }
     } catch (err) {
-      setError(err.message ?? 'Faylni yuklashda xatolik yuz berdi')
+      // Backend qator-qator xatoliklarni `{"errors": [{"row", "error"}, ...]}`
+      // shaklida qaytaradi (admin panelida ko'rsatilgani bilan bir xil) —
+      // shu tafsilotlarni ham ko'rsatamiz, faqat umumiy xabar bilan cheklanmaymiz.
+      if (Array.isArray(err.data?.errors) && err.data.errors.length > 0) {
+        setRowErrors(err.data.errors)
+        setError(err.data.detail || 'Faylda xatoliklar topildi.')
+      } else {
+        setError(err.message ?? 'Faylni yuklashda xatolik yuz berdi')
+      }
     } finally {
       setIsUploading(false)
     }
@@ -69,6 +89,7 @@ export default function ExcelUploadModal({ open, onClose, onUpload }) {
       return
     }
     setError('')
+    setRowErrors([])
     setFile(candidate)
   }
 
@@ -96,6 +117,11 @@ export default function ExcelUploadModal({ open, onClose, onUpload }) {
             <Icon name="badgeCheck" className="size-8" />
           </span>
           <p className="text-sm font-medium text-base-content">Guruh a'zolari muvaffaqiyatli yuklandi!</p>
+          {rowWarnings.length > 0 && (
+            <div className="w-full text-left">
+              <ExcelUploadResult warnings={rowWarnings} />
+            </div>
+          )}
           <Button type="button" onClick={handleClose} className="w-full">
             Yopish
           </Button>
@@ -179,7 +205,11 @@ export default function ExcelUploadModal({ open, onClose, onUpload }) {
             />
           </label>
 
-          {error && <Alert variant="error">{error}</Alert>}
+          {rowErrors.length > 0 ? (
+            <ExcelUploadResult errors={rowErrors} />
+          ) : (
+            error && <Alert variant="error">{error}</Alert>
+          )}
 
           {isUploading && (
             <p className="flex items-center gap-2 text-xs text-base-content/50">
