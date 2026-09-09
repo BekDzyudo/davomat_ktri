@@ -6,6 +6,7 @@ import Faculties from './pages/Faculties'
 import ForgotPassword from './pages/ForgotPassword'
 import GroupDetail from './pages/GroupDetail'
 import Groups from './pages/Groups'
+import LiveMonitoring from './pages/LiveMonitoring'
 import Login from './pages/Login'
 import NotFound from './pages/NotFound'
 import Notifications from './pages/Notifications'
@@ -45,6 +46,14 @@ export default function App() {
           element={
             <RequireRole roles={[ROLES.SUPERADMIN]}>
               <Staff />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/live-monitoring"
+          element={
+            <RequireRole roles={[ROLES.SUPERADMIN]}>
+              <LiveMonitoring />
             </RequireRole>
           }
         />
