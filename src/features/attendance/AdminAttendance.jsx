@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { listAttendanceFor, saveBulkAttendance, uploadExcuseFile } from '../../api/attendance'
 import { listGroups } from '../../api/groups'
-import { listSchedule } from '../../api/schedule'
+import { listScheduleOccurrences } from '../../api/schedule'
 import { listStudents } from '../../api/students'
 import Alert from '../../components/form/Alert'
 import GroupChipRow from '../../components/GroupChipRow'
@@ -10,7 +10,7 @@ import { useToast } from '../../context/useToast'
 import { DAYS } from '../../data/mockSchedule'
 import { usePersistedGroupId } from '../../hooks/usePersistedGroupId'
 import { getLessonStart, getLessonTiming, getTodayDayKeyInWeek } from '../../utils/publicSchedule'
-import { getMonday, toIsoDate } from '../../utils/date'
+import { addDays, getMonday, toIsoDate } from '../../utils/date'
 import DayTabs from '../publicHome/DayTabs'
 import LessonCard from '../publicHome/LessonCard'
 import WeekNavigator from '../schedule/WeekNavigator'
@@ -18,7 +18,12 @@ import ExcuseModal from './ExcuseModal'
 import LessonAttendanceEditor from './LessonAttendanceEditor'
 
 export default function AdminAttendance() {
-  const [allLessons, setAllLessons] = useState([])
+  // Faqat tanlangan haftaning HAQIQIY dars kunlari — `/schedule/occurrences/`
+  // valid_from/valid_until'ni hisobga oladi, shuning uchun bitta sanaga
+  // (reference_date) tegishli bo'lib qolgan eski dars keyingi haftalarda
+  // qolib ketmaydi (aks holda shu kun/vaqtga eski va yangi dars ustma-ust
+  // ko'rinib, "guruhda 2 ta dars bor" bo'lib chiqadi).
+  const [weekLessons, setWeekLessons] = useState([])
   const [groups, setGroups] = useState([])
   const [students, setStudents] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -38,10 +43,9 @@ export default function AdminAttendance() {
 
   useEffect(() => {
     let cancelled = false
-    Promise.all([listSchedule(), listGroups(), listStudents()])
-      .then(([lessonsData, groupsData, studentsData]) => {
+    Promise.all([listGroups(), listStudents()])
+      .then(([groupsData, studentsData]) => {
         if (cancelled) return
-        setAllLessons(lessonsData)
         setGroups(groupsData)
         setStudents(studentsData)
         resolveGroupId(groupsData)
@@ -57,9 +61,29 @@ export default function AdminAttendance() {
     }
   }, [resolveGroupId])
 
-  const subjectName = (id) => allLessons.find((l) => l.subjectId === id)?.subjectName ?? '—'
-  const groupName = (id) => allLessons.find((l) => l.groupId === id)?.groupName ?? '—'
-  const teacherName = (id) => allLessons.find((l) => l.teacherId === id)?.teacherName ?? '—'
+  const loadWeekLessons = useCallback(() => {
+    const dateFrom = toIsoDate(weekStart)
+    const dateTo = toIsoDate(addDays(weekStart, 4))
+    return listScheduleOccurrences(dateFrom, dateTo)
+  }, [weekStart])
+
+  useEffect(() => {
+    let cancelled = false
+    loadWeekLessons()
+      .then((data) => {
+        if (!cancelled) setWeekLessons(data)
+      })
+      .catch((err) => {
+        if (!cancelled) setLoadError(err.message ?? "Ma'lumotlarni yuklab bo'lmadi")
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [loadWeekLessons])
+
+  const subjectName = (id) => weekLessons.find((l) => l.subjectId === id)?.subjectName ?? '—'
+  const groupName = (id) => weekLessons.find((l) => l.groupId === id)?.groupName ?? '—'
+  const teacherName = (id) => weekLessons.find((l) => l.teacherId === id)?.teacherName ?? '—'
 
   const handleGroupChange = (nextGroupId) => {
     setGroupId(nextGroupId)
@@ -77,8 +101,8 @@ export default function AdminAttendance() {
     setSelectedLessonId(null)
   }
 
-  const groupLessons = allLessons.filter((l) => l.groupId === groupId)
-  const dayLessons = groupLessons.filter((l) => l.day === activeDay)
+  const groupLessons = weekLessons.filter((l) => l.groupId === groupId)
+  const dayLessons = groupLessons.filter((l) => l.day === activeDay && !l.cancelled)
 
   const selectedLesson = groupLessons.find((l) => l.id === selectedLessonId) ?? null
   const groupStudents = selectedLesson

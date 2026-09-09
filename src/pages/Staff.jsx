@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { getStaffTree } from '../api/staff'
 import Alert from '../components/form/Alert'
 import Icon from '../components/Icon'
@@ -16,10 +16,6 @@ function flattenStaffMembers(node) {
 
 const STAT_TAB_MAP = { keldi: 'kelganlar', kechQoldi: 'kechQolganlar', kelmagan: 'kelmaganlar', sababli: 'sababli' }
 
-// "Sababli" toifasi hozircha bo'sh chiqadi — backend xodim tuzilmasida
-// (`getStaffTree`) hali "sababli sabab bilan yo'q" degan alohida maydon yo'q
-// (faqat `checkIn` bor). Backend bu maydonni qo'shsa (masalan `member.status
-// === 'sababli'`), shu toifa avtomatik to'ldiriladi.
 const STAT_DEFS = [
   {
     key: 'keldi',
@@ -64,22 +60,26 @@ export default function Staff() {
   const [loadError, setLoadError] = useState('')
   const [activeStat, setActiveStat] = useState(null)
 
+  // `useCallback` — sabab kiritilgach (`StaffAnalysisModal`) daraxtni qayta
+  // so'rash uchun ham qayta ishlatiladi, faqat mount paytida emas.
+  const loadTree = useCallback(() => {
+    return getStaffTree()
+      .then((data) => {
+        setTree(data)
+        setLoadError('')
+      })
+      .catch((err) => setLoadError(err.message ?? "Tuzilmani yuklab bo'lmadi"))
+  }, [])
+
   useEffect(() => {
     let cancelled = false
-    getStaffTree()
-      .then((data) => {
-        if (!cancelled) setTree(data)
-      })
-      .catch((err) => {
-        if (!cancelled) setLoadError(err.message ?? "Tuzilmani yuklab bo'lmadi")
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false)
-      })
+    loadTree().finally(() => {
+      if (!cancelled) setIsLoading(false)
+    })
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [loadTree])
 
   const allMembers = useMemo(() => flattenStaffMembers(tree), [tree])
   const groups = useMemo(
@@ -150,6 +150,7 @@ export default function Staff() {
         onClose={() => setActiveStat(null)}
         members={allMembers}
         initialTab={STAT_TAB_MAP[activeStat] ?? 'kelganlar'}
+        onExcused={loadTree}
       />
     </div>
   )

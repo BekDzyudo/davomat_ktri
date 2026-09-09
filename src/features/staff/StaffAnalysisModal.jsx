@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
+import { submitStaffExcuse } from '../../api/staff'
 import Icon from '../../components/Icon'
 import { useToast } from '../../context/useToast'
+import StaffExcuseModal from './StaffExcuseModal'
 
 function initials(name) {
   return name
@@ -101,9 +103,9 @@ function PresenceTable({ rows, onZoomPhoto, badgeTone = 'success' }) {
               <td className="py-3 pr-3">
                 <button
                   type="button"
-                  disabled={!m.avatar}
-                  onClick={() => onZoomPhoto(m.avatar)}
-                  title="Kirishdagi suratni ko'rish"
+                  disabled={!m.entryPhoto}
+                  onClick={() => onZoomPhoto(m.entryPhoto)}
+                  title="Kirishda kamera tutib olgan suratni ko'rish"
                   className="inline-flex items-center gap-1.5 rounded-lg bg-info px-3 py-1.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-info/90 disabled:cursor-not-allowed disabled:bg-base-300 disabled:text-base-content/30"
                 >
                   <Icon name="camera" className="size-3.5" />
@@ -119,17 +121,20 @@ function PresenceTable({ rows, onZoomPhoto, badgeTone = 'success' }) {
 }
 
 /**
- * "Sabab kiritish" / "O'zgartirish" tugmalari hozircha faqat vizual — xodim
- * uchun kelmaslik sababini saqlaydigan backend endpoint hali yo'q (faqat
- * talaba davomatida shunday imkoniyat bor). Backend tayyor bo'lgach shu
- * yerga haqiqiy so'rov ulanadi, hozircha ogohlantirish ko'rsatiladi.
+ * "Sabab kiritish" / "O'zgartirish" tugmalari xodimning BUGUNGI yo'qligini
+ * "sababli" deb belgilaydi (`submitStaffExcuse` → `/api/staff/members/<id>/
+ * excuse/`) — muvaffaqiyatli bo'lgach `onExcused()` chaqirilib, chaqiruvchi
+ * tomon (`Staff.jsx`) daraxtni qayta so'raydi, shu bilan xodim "Kelmaganlar"
+ * tabidan "Sababli" tabiga o'tadi.
  */
-export default function StaffAnalysisModal({ open, onClose, members, initialTab = 'kelganlar' }) {
+export default function StaffAnalysisModal({ open, onClose, members, initialTab = 'kelganlar', onExcused }) {
   // Modal har safar yopiq holatdan ochilganda `activeTab` `initialTab`ga
   // qaytariladi — bu render vaqtida (effektsiz) amalga oshiriladi, React
   // hujjatlaridagi "propga bog'liq state'ni reset qilish" andozasi bo'yicha.
   const [tabState, setTabState] = useState({ activeTab: initialTab, lateSubTab: 'ogohlantirish', wasOpen: open })
   const [lightboxImage, setLightboxImage] = useState(null)
+  const [excuseTarget, setExcuseTarget] = useState(null)
+  const [isSavingExcuse, setIsSavingExcuse] = useState(false)
   if (open && !tabState.wasOpen) {
     setTabState({ activeTab: initialTab, lateSubTab: 'ogohlantirish', wasOpen: true })
     if (lightboxImage) setLightboxImage(null)
@@ -144,7 +149,19 @@ export default function StaffAnalysisModal({ open, onClose, members, initialTab 
 
   if (!open) return null
 
-  const notReady = () => toast.error("Bu amal hali backendga ulanmagan — tez orada qo'shiladi")
+  const handleExcuseConfirm = async ({ reason, file }) => {
+    setIsSavingExcuse(true)
+    try {
+      await submitStaffExcuse(excuseTarget.staffId, { reasonText: reason, file })
+      toast.success('Sabab saqlandi.')
+      setExcuseTarget(null)
+      await onExcused?.()
+    } catch (err) {
+      toast.error(err.message ?? "Saqlashda xatolik yuz berdi")
+    } finally {
+      setIsSavingExcuse(false)
+    }
+  }
   const rows = members.filter((m) => matchTab(activeTab, m))
 
   return createPortal(
@@ -258,10 +275,10 @@ export default function StaffAnalysisModal({ open, onClose, members, initialTab 
                           <div className="flex shrink-0 items-center gap-2">
                             <button
                               type="button"
-                              disabled={!m.avatar}
-                              onClick={() => setLightboxImage(m.avatar)}
-                              title="Kirishdagi suratni ko'rish"
-                              aria-label="Kirishdagi suratni ko'rish"
+                              disabled={!m.entryPhoto}
+                              onClick={() => setLightboxImage(m.entryPhoto)}
+                              title="Kirishda kamera tutib olgan suratni ko'rish"
+                              aria-label="Kirishda kamera tutib olgan suratni ko'rish"
                               className="flex size-8 items-center justify-center rounded-lg bg-info text-white shadow-sm transition-colors hover:bg-info/90 disabled:cursor-not-allowed disabled:bg-base-300 disabled:text-base-content/30"
                             >
                               <Icon name="camera" className="size-4" />
@@ -329,7 +346,7 @@ export default function StaffAnalysisModal({ open, onClose, members, initialTab 
                         <td className="py-3 pr-3 text-right">
                           <button
                             type="button"
-                            onClick={notReady}
+                            onClick={() => setExcuseTarget(m)}
                             className="inline-flex items-center gap-1.5 rounded-lg border border-info/40 px-3 py-1.5 text-xs font-bold text-info transition-colors hover:bg-info/10"
                           >
                             <Icon name={activeTab === 'sababli' ? 'settings' : 'pencil'} className="size-3.5" />
@@ -365,6 +382,16 @@ export default function StaffAnalysisModal({ open, onClose, members, initialTab 
             onClick={(e) => e.stopPropagation()}
           />
         </div>
+      )}
+
+      {excuseTarget && (
+        <StaffExcuseModal
+          member={excuseTarget}
+          initialReason={excuseTarget.reasonText}
+          onClose={() => setExcuseTarget(null)}
+          onConfirm={handleExcuseConfirm}
+          isSaving={isSavingExcuse}
+        />
       )}
     </div>,
     document.body,

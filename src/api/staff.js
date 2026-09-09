@@ -18,3 +18,17 @@ export async function getStaffTree() {
     throw err
   }
 }
+
+/**
+ * Xodimning BUGUNGI yo'qligini "sababli" deb belgilaydi (yoki mavjud
+ * sababni yangilaydi) — `StaffAnalysisModal`dagi "Kelmaganlar" bo'limida
+ * "Sabab kiritish"/"Sababli" bo'limida "O'zgartirish" tugmalari shu orqali
+ * ishlaydi. Muvaffaqiyatli bo'lsa, chaqiruvchi tomon `getStaffTree()`ni
+ * qayta so'rab, xodim "Sababli" tabiga o'tganini ko'rsatishi kerak.
+ */
+export async function submitStaffExcuse(staffId, { reasonText, file }) {
+  const formData = new FormData()
+  formData.append('reason_text', reasonText)
+  if (file) formData.append('reason_file', file)
+  return apiFetch(`/api/staff/members/${staffId}/excuse/`, { method: 'POST', formData })
+}
