@@ -303,7 +303,7 @@ export default function AttendanceCalendarModal({ member, onClose, showWorkStats
                       photoUrl={selectedInfo.entryPhoto}
                       scenePhoto={selectedInfo.entryScenePhoto}
                       onOpenPhoto={setLightboxPhoto}
-                      className="size-16 border-2 border-success/20"
+                      className="size-24 border-2 border-success/20"
                     />
                     <p className="whitespace-nowrap text-2xl font-black tabular-nums tracking-tight text-base-content">{selectedInfo.checkIn ?? '—'}</p>
                   </div>
@@ -316,7 +316,7 @@ export default function AttendanceCalendarModal({ member, onClose, showWorkStats
                       photoUrl={selectedInfo.exitPhoto}
                       scenePhoto={selectedInfo.exitScenePhoto}
                       onOpenPhoto={setLightboxPhoto}
-                      className="size-16 border-2 border-error/20"
+                      className="size-24 border-2 border-error/20"
                     />
                     <p className="whitespace-nowrap text-2xl font-black tabular-nums tracking-tight text-base-content">{selectedInfo.checkOut ?? '—'}</p>
                   </div>
@@ -363,7 +363,7 @@ export default function AttendanceCalendarModal({ member, onClose, showWorkStats
                                 photoUrl={event.photo}
                                 scenePhoto={event.scenePhoto}
                                 onOpenPhoto={setLightboxPhoto}
-                                className={`size-9 border ${label.ring}`}
+                                className={`size-11 border ${label.ring}`}
                               />
                               <div className="min-w-0 leading-tight">
                                 <p className="text-base font-extrabold tabular-nums text-base-content">{formatTimeOfDay(event.time)}</p>
@@ -380,7 +380,7 @@ export default function AttendanceCalendarModal({ member, onClose, showWorkStats
                     <div className="relative flex flex-col gap-2 pl-4 before:absolute before:bottom-3 before:left-0.75 before:top-3 before:w-px before:bg-base-300">
                       <div className="relative flex items-center gap-2.5 rounded-xl border border-base-300 bg-base-100 p-2.5 shadow-sm">
                         <span className="absolute left-[-1.05rem] size-2.5 rounded-full border-2 border-base-100 bg-success ring-1 ring-success" />
-                        <MemberAvatar member={member} className="size-9 border border-success/20" />
+                        <MemberAvatar member={member} className="size-11 border border-success/20" />
                         <div className="min-w-0 leading-tight">
                           <p className="text-base font-extrabold tabular-nums text-base-content">{selectedInfo.checkIn}</p>
                           <p className="text-xs font-bold text-success">↓ Kirish</p>
@@ -388,7 +388,7 @@ export default function AttendanceCalendarModal({ member, onClose, showWorkStats
                       </div>
                       <div className="relative flex items-center gap-2.5 rounded-xl border border-base-300 bg-base-100 p-2.5 shadow-sm">
                         <span className="absolute left-[-1.05rem] size-2.5 rounded-full border-2 border-base-100 bg-error ring-1 ring-error" />
-                        <MemberAvatar member={member} className="size-9 border border-error/20" />
+                        <MemberAvatar member={member} className="size-11 border border-error/20" />
                         <div className="min-w-0 leading-tight">
                           <p className="text-base font-extrabold tabular-nums text-base-content">{selectedInfo.checkOut}</p>
                           <p className="text-xs font-bold text-error">↑ Chiqish</p>
