@@ -18,12 +18,16 @@ function mapFeedItemFromApi(item) {
  * hodisalari ("Jonli efir" — kim kirdi/chiqdi, `feed`) qaytadi.
  *
  * `type` — `'student' | 'teacher' | 'staff'` bo'lsa, faqat o'sha toifadagi
- * hodisalar bilan filtrlanadi (bo'sh/`undefined` — hammasi). Real vaqtda
- * push (websocket) yo'q — chaqiruvchi tomon davriy so'rov (polling) bilan
+ * hodisalar bilan filtrlanadi (bo'sh/`undefined` — hammasi). `dateFrom`/
+ * `dateTo` (`YYYY-MM-DD`) — hodisalar shu kun (00:00 dan 00:00 gacha) bilan
+ * cheklanadi (odatda ikkalasi ham bugungi sana). Real vaqtda push
+ * (websocket) yo'q — chaqiruvchi tomon davriy so'rov (polling) bilan
  * yangilashi kerak.
  */
-export async function getLiveMonitoring({ type, limit = 20 } = {}) {
-  const data = await apiFetch('/api/faceid/live/', { params: { type, limit } })
+export async function getLiveMonitoring({ type, dateFrom, dateTo, limit = 200 } = {}) {
+  const data = await apiFetch('/api/faceid/live/', {
+    params: { type, date_from: dateFrom, date_to: dateTo, limit },
+  })
   return {
     counts: data.counts,
     feed: (data.feed ?? []).map(mapFeedItemFromApi),

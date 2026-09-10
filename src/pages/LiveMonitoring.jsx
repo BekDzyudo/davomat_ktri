@@ -36,6 +36,17 @@ function formatFeedTime(isoDateTime) {
   return `${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
+function formatDateParam(date) {
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
+}
+
+function isSameDay(isoDateTime, date) {
+  if (!isoDateTime) return false
+  const d = new Date(isoDateTime)
+  return d.getFullYear() === date.getFullYear() && d.getMonth() === date.getMonth() && d.getDate() === date.getDate()
+}
+
 function initials(name) {
   return (name ?? '')
     .split(' ')
@@ -129,7 +140,8 @@ export default function LiveMonitoring() {
     let cancelled = false
     const load = () => {
       if (hasLoadedLiveOnceRef.current) setIsFeedRefreshing(true)
-      getLiveMonitoring({ type: feedFilter === 'all' ? undefined : feedFilter })
+      const today = formatDateParam(new Date())
+      getLiveMonitoring({ type: feedFilter === 'all' ? undefined : feedFilter, dateFrom: today, dateTo: today })
         .then((data) => {
           if (!cancelled) setLiveData(data)
         })
@@ -150,6 +162,10 @@ export default function LiveMonitoring() {
   }, [feedFilter])
 
   const units = useMemo(() => (tree?.children ?? []).reduce((acc, child) => collectUnits(child, acc), []), [tree])
+
+  // Backend `date_from`/`date_to` filtrini e'tiborsiz qoldirsa ham — "Jonli
+  // efir" faqat joriy kunning (00:00 dan 00:00 gacha) hodisalarini ko'rsatsin.
+  const todaysFeed = useMemo(() => liveData.feed.filter((m) => isSameDay(m.time, now)), [liveData.feed, now])
 
   const attendanceRate = (dashboard?.summary?.attendance_percent ?? 0) / 100
   const counts = liveData.counts
@@ -345,11 +361,11 @@ export default function LiveMonitoring() {
                 ))}
               </div>
 
-              {liveData.feed.length === 0 ? (
+              {todaysFeed.length === 0 ? (
                 <p className="live-monitoring-empty">Hozircha hodisalar yo'q</p>
               ) : (
                 <ul className="live-monitoring-feed-list">
-                  {liveData.feed.map((m) => {
+                  {todaysFeed.map((m) => {
                     const isOutgoing = m.direction === 'exit'
                     const toneClass = isOutgoing ? 'live-monitoring-feed-item--out' : 'live-monitoring-feed-item--in'
                     const typeLabel = FEED_TYPE_LABELS[m.personType] ?? ''
