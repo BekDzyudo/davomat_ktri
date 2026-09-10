@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { getLiveMonitoring } from '../api/faceid'
 import { getDashboard } from '../api/reports'
 import { getStaffTree } from '../api/staff'
 import { listGroups } from '../api/groups'
@@ -12,8 +13,28 @@ const UZ_MONTHS = [
 ]
 const UZ_WEEKDAYS = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba']
 
+// "Jonli efir" qancha tez-tez qayta so'raladi (millisekund) — real vaqtda
+// push (websocket) yo'q, shu sabab davriy so'rov (polling) bilan yangilanadi.
+const LIVE_FEED_POLL_MS = 10000
+
+const FEED_FILTERS = [
+  { key: 'all', label: 'Hammasi' },
+  { key: 'teacher', label: "O'qituvchilar" },
+  { key: 'student', label: 'Tinglovchilar' },
+  { key: 'staff', label: 'Xodimlar' },
+]
+
+const FEED_TYPE_LABELS = { student: 'Tinglovchi', teacher: "O'qituvchi", staff: 'Xodim' }
+
 const formatClock = (date) => date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
 const formatDayLabel = (date) => `${UZ_WEEKDAYS[date.getDay()]}, ${date.getDate()}-${UZ_MONTHS[date.getMonth()]}`
+
+function formatFeedTime(isoDateTime) {
+  if (!isoDateTime) return '—'
+  const d = new Date(isoDateTime)
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
 
 function initials(name) {
   return (name ?? '')
@@ -23,13 +44,6 @@ function initials(name) {
     .map((part) => part[0])
     .join('')
     .toUpperCase()
-}
-
-function flattenMembers(node) {
-  if (!node) return []
-  const own = (node.members ?? []).map((m) => ({ ...m, unitTitle: node.title }))
-  const children = (node.children ?? []).flatMap((child) => flattenMembers(child))
-  return [...own, ...children]
 }
 
 function collectUnits(node, acc) {
@@ -43,19 +57,6 @@ function collectUnits(node, acc) {
   })
   ;(node.children ?? []).forEach((child) => collectUnits(child, acc))
   return acc
-}
-
-/**
- * Backendda hali "jonli hodisalar" (live check-in/check-out) endpointi yo'q
- * — shu sabab bu ro'yxat institut xodimlarining (haqiqiy) kirish vaqtlari
- * asosida, eng so'nggi keldilar birinchi bo'lib chiqadigan qilib tuziladi.
- * Talaba/o'qituvchi darajasidagi jonli oqim backend qo'shilgach ulanadi.
- */
-function buildLiveFeed(staffMembers) {
-  return staffMembers
-    .filter((m) => !!m.checkIn)
-    .sort((a, b) => (a.checkIn < b.checkIn ? 1 : -1))
-    .slice(0, 8)
 }
 
 /**
@@ -92,6 +93,16 @@ export default function LiveMonitoring() {
   const [dashboard, setDashboard] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  const [feedFilter, setFeedFilter] = useState('all')
+  const [liveData, setLiveData] = useState({ counts: null, feed: [] })
+  const [isLiveLoading, setIsLiveLoading] = useState(true)
+  const [isFeedRefreshing, setIsFeedRefreshing] = useState(false)
+  // Butun sahifani qayta "yuklanmoqda" holatiga qaytarmasin uchun — faqat
+  // ENG BIRINCHI muvaffaqiyatli yuklashda `isLiveLoading` ishlatiladi,
+  // keyingi har bir yangilanish (filtr almashtirish yoki davriy so'rov)
+  // faqat kichik `isFeedRefreshing` indikatorini ko'rsatadi.
+  const hasLoadedLiveOnceRef = useRef(false)
+
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(id)
@@ -111,31 +122,49 @@ export default function LiveMonitoring() {
     }
   }, [])
 
-  const staffMembers = useMemo(() => flattenMembers(tree), [tree])
+  // "Jonli efir" — filtr o'zgarganda darhol qayta so'raladi, aks holda har
+  // `LIVE_FEED_POLL_MS`da avtomatik yangilanadi (kim kirdi/chiqdi real vaqtga
+  // yaqin ko'rinib tursin uchun — websocket yo'qligi sabab davriy so'rov).
+  useEffect(() => {
+    let cancelled = false
+    const load = () => {
+      if (hasLoadedLiveOnceRef.current) setIsFeedRefreshing(true)
+      getLiveMonitoring({ type: feedFilter === 'all' ? undefined : feedFilter })
+        .then((data) => {
+          if (!cancelled) setLiveData(data)
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (cancelled) return
+          hasLoadedLiveOnceRef.current = true
+          setIsLiveLoading(false)
+          setIsFeedRefreshing(false)
+        })
+    }
+    load()
+    const id = setInterval(load, LIVE_FEED_POLL_MS)
+    return () => {
+      cancelled = true
+      clearInterval(id)
+    }
+  }, [feedFilter])
+
   const units = useMemo(() => (tree?.children ?? []).reduce((acc, child) => collectUnits(child, acc), []), [tree])
-  const liveFeed = useMemo(() => buildLiveFeed(staffMembers), [staffMembers])
 
   const attendanceRate = (dashboard?.summary?.attendance_percent ?? 0) / 100
-  const studentsTotal = dashboard?.totals?.students ?? groups.reduce((sum, g) => sum + (g.studentsCount ?? 0), 0)
-  const teachersTotal = dashboard?.totals?.teachers ?? 0
-  const staffTotal = staffMembers.length
-  const staffPresent = staffMembers.filter((m) => !!m.checkIn).length
-
-  const overviewData = {
-    students: { total: studentsTotal, present: Math.round(studentsTotal * attendanceRate) },
-    teachers: { total: teachersTotal, present: Math.round(teachersTotal * attendanceRate) },
-    staff: { total: staffTotal, present: staffPresent },
-  }
+  const counts = liveData.counts
 
   const summaryCards = [
-    { key: 'students', label: 'Tinglovchilar', icon: 'users', tone: 'blue' },
-    { key: 'teachers', label: "O'qituvchilar", icon: 'user', tone: 'green' },
+    { key: 'student', label: 'Tinglovchilar', icon: 'users', tone: 'blue' },
+    { key: 'teacher', label: "O'qituvchilar", icon: 'user', tone: 'green' },
     { key: 'staff', label: 'Xodimlar', icon: 'briefcase', tone: 'orange' },
   ]
 
+  const pageLoading = isLoading || isLiveLoading
+
   return (
     <div className="live-monitoring-page">
-      {isLoading ? (
+      {pageLoading ? (
         <div className="flex justify-center py-16">
           <span className="loading loading-spinner loading-lg text-primary" />
         </div>
@@ -176,7 +205,7 @@ export default function LiveMonitoring() {
 
           <section className="live-monitoring-summary-grid">
             {summaryCards.map(({ key, label, icon, tone }) => {
-              const item = overviewData[key]
+              const item = counts[key]
               const absent = Math.max(item.total - item.present, 0)
               return (
                 <div key={key} className="live-monitoring-summary-card">
@@ -299,16 +328,32 @@ export default function LiveMonitoring() {
                     <span className="live-monitoring-live-dot-inner" />
                   </span>
                   <h2>Jonli Efir</h2>
+                  {isFeedRefreshing && <span className="loading loading-spinner loading-xs" />}
                 </div>
               </div>
 
-              {liveFeed.length === 0 ? (
+              <div className="live-monitoring-feed-filters">
+                {FEED_FILTERS.map((f) => (
+                  <button
+                    key={f.key}
+                    type="button"
+                    onClick={() => setFeedFilter(f.key)}
+                    className={`live-monitoring-feed-filter-btn ${feedFilter === f.key ? 'live-monitoring-feed-filter-btn--active' : ''}`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+
+              {liveData.feed.length === 0 ? (
                 <p className="live-monitoring-empty">Hozircha hodisalar yo'q</p>
               ) : (
                 <ul className="live-monitoring-feed-list">
-                  {liveFeed.map((m) => {
-                    const isOutgoing = Boolean(m.checkOut || m.type === 'out' || m.eventType === 'out' || m.status === 'checkout')
+                  {liveData.feed.map((m) => {
+                    const isOutgoing = m.direction === 'exit'
                     const toneClass = isOutgoing ? 'live-monitoring-feed-item--out' : 'live-monitoring-feed-item--in'
+                    const typeLabel = FEED_TYPE_LABELS[m.personType] ?? ''
+                    const metaLine = m.meta ? `${typeLabel}: ${m.meta}` : typeLabel
 
                     return (
                       <li key={m.id} className={`live-monitoring-feed-item ${toneClass}`}>
@@ -321,9 +366,9 @@ export default function LiveMonitoring() {
                           </span>
                           <div className="live-monitoring-feed-copy">
                             <p className="live-monitoring-feed-name">{m.name}</p>
-                            <p className="live-monitoring-feed-meta">Xodim: {m.unitTitle ?? '—'}</p>
+                            <p className="live-monitoring-feed-meta">{metaLine}</p>
                           </div>
-                          <p className="live-monitoring-feed-time">{m.checkIn}</p>
+                          <p className="live-monitoring-feed-time">{formatFeedTime(m.time)}</p>
                         </button>
                       </li>
                     )

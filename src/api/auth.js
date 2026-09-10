@@ -1,4 +1,4 @@
-import { apiFetch, clearTokens, setTokens } from './client'
+import { apiFetch, clearTokens, getRefreshToken, setTokens } from './client'
 import { mapRoleFromApi, mapRoleToApi } from './roles'
 
 export function mapUserFromApi(u) {
@@ -71,8 +71,29 @@ export function confirmPasswordReset({ email, code, newPassword }) {
   })
 }
 
-export function logout() {
-  clearTokens()
+/**
+ * Tizimdan chiqish.
+ *
+ * DIQQAT: ilgari bu funksiya faqat `localStorage`ni tozalardi — token esa
+ * SERVERDA amal qilaverardi (refresh token 7 kungacha). Ya'ni nusxasi olingan
+ * token "chiqish"dan keyin ham ishlayverardi. Endi avval serverga xabar
+ * beriladi va token qora ro'yxatga olinadi.
+ *
+ * So'rov muvaffaqiyatsiz bo'lsa ham (internet yo'q, token allaqachon eskirgan)
+ * lokal tokenlar BARIBIR o'chiriladi — foydalanuvchi chiqa olmay qolmasligi
+ * kerak.
+ */
+export async function logout() {
+  const refresh = getRefreshToken()
+  try {
+    if (refresh) {
+      await apiFetch('/api/accounts/auth/logout/', { method: 'POST', body: { refresh } })
+    }
+  } catch {
+    // Ataylab e'tiborsiz qoldiriladi — pastdagi tozalash har qanday holatda bajariladi.
+  } finally {
+    clearTokens()
+  }
 }
 
 export { mapRoleToApi }

@@ -38,6 +38,9 @@ export function AuthProvider({ children }) {
   }, [])
 
   const logout = useCallback(() => {
+    // `apiLogout` endi asinxron (serverda tokenni bekor qiladi) — lekin UI uni
+    // kutib turmaydi: foydalanuvchi darhol chiqarilishi kerak. Tokenlar
+    // `apiLogout` ichida har qanday holatda tozalanadi.
     apiLogout()
     setCurrentUser(null)
   }, [])
