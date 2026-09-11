@@ -47,11 +47,24 @@ const STAT_DEFS = [
   },
 ]
 
+// Har bir holat (keldi / kech qoldi / kelmagan / sababli) o'z rangi bilan
+// BIR QARASHDA ajralib turishi kerak — bu kartalar shunchaki bezak emas,
+// bosilganda o'sha toifadagi xodimlar ro'yxatini ochadi.
+//
+// DIQQAT: ilgari chegara rangi 25-30% shaffoflikda edi (`border-success/25`),
+// belgi (chip) esa 12-18% da — oq fon ustida ular deyarli ko'rinmasdi va
+// to'rtala karta bir xil kulrang bo'lib qolardi. Shu sabab endi chegara TO'LIQ
+// rangda va 2px qalinlikda (xuddi shu sahifadagi tuzilma kartalari —
+// `UnitBox` — bilan bir xil uslub), belgi esa to'ldirilgan rang bilan.
+//
+// Raqamning o'zi ataylab `text-base-content`da qoladi: rangli matn ochiq
+// fonda ham, qorong'i mavzuda ("night") ham bir xil yaxshi o'qilmaydi —
+// rangni chegara va belgi olib yuradi, raqam esa maksimal kontrastda turadi.
 const TONE_CLASSES = {
-  success: { chip: 'bg-success/12 text-success', border: 'border-success/25 hover:border-success/60', line: 'bg-success' },
-  warning: { chip: 'bg-warning/18 text-warning', border: 'border-warning/30 hover:border-warning/60', line: 'bg-warning' },
-  error: { chip: 'bg-error/12 text-error', border: 'border-error/25 hover:border-error/60', line: 'bg-error' },
-  info: { chip: 'bg-info/12 text-info', border: 'border-info/25 hover:border-info/60', line: 'bg-info' },
+  success: { chip: 'bg-success text-success-content', card: 'border-success bg-success/8 hover:bg-success/16' },
+  warning: { chip: 'bg-warning text-warning-content', card: 'border-warning bg-warning/10 hover:bg-warning/20' },
+  error: { chip: 'bg-error text-error-content', card: 'border-error bg-error/8 hover:bg-error/16' },
+  info: { chip: 'bg-info text-info-content', card: 'border-info bg-info/8 hover:bg-info/16' },
 }
 
 export default function Staff() {
@@ -114,7 +127,7 @@ export default function Staff() {
                 key={def.key}
                 type="button"
                 onClick={() => setActiveStat(def.key)}
-                className={`group flex min-w-[160px] flex-1 items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md sm:min-w-[180px] ${TONE_CLASSES[def.tone].border} ${def.key === 'keldi' || def.key === 'kelmagan' ? 'bg-base-200/80' : 'bg-base-100'}`}
+                className={`group flex min-w-[160px] flex-1 items-center gap-2.5 rounded-xl border-2 px-3 py-2.5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md sm:min-w-[180px] ${TONE_CLASSES[def.tone].card}`}
               >
                 <span className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${TONE_CLASSES[def.tone].chip}`}>
                   <Icon name={def.icon} className="size-4" />

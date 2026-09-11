@@ -41,12 +41,6 @@ function formatDateParam(date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
 
-function isSameDay(isoDateTime, date) {
-  if (!isoDateTime) return false
-  const d = new Date(isoDateTime)
-  return d.getFullYear() === date.getFullYear() && d.getMonth() === date.getMonth() && d.getDate() === date.getDate()
-}
-
 function initials(name) {
   return (name ?? '')
     .split(' ')
@@ -163,9 +157,15 @@ export default function LiveMonitoring() {
 
   const units = useMemo(() => (tree?.children ?? []).reduce((acc, child) => collectUnits(child, acc), []), [tree])
 
-  // Backend `date_from`/`date_to` filtrini e'tiborsiz qoldirsa ham — "Jonli
-  // efir" faqat joriy kunning (00:00 dan 00:00 gacha) hodisalarini ko'rsatsin.
-  const todaysFeed = useMemo(() => liveData.feed.filter((m) => isSameDay(m.time, now)), [liveData.feed, now])
+  // "Jonli efir" — bir kunlik oyna endi BACKEND tomonida cheklanadi
+  // (`date_from`/`date_to`), shuning uchun bu yerda qo'shimcha filtr YO'Q.
+  //
+  // DIQQAT: ilgari shu joyda `event_time` bo'yicha "faqat bugungi" filtri
+  // turardi. Backend esa hodisani `created_at` (serverga kelib tushgan vaqt)
+  // bo'yicha tanlaydi, chunki qurilma soati noto'g'ri bo'lishi mumkin. Ikki xil
+  // maydon bo'yicha ikki marta filtrlash aynan soati adashgan qurilmadan
+  // kelgan hodisalarni efirdan yo'qotib qo'yardi.
+  const todaysFeed = liveData.feed
 
   const attendanceRate = (dashboard?.summary?.attendance_percent ?? 0) / 100
   const counts = liveData.counts

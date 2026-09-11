@@ -12,7 +12,8 @@
     "subjects": "Modullar",
     "schedule": "Dars jadvali",
     "attendance": "Davomat",
-    "reports": "Hisobotlar"
+    "reports": "Hisobotlar",
+    "missedLessons": "Dars qoldirganlar"
   },
   "header": {
     "logout": "Chiqish",

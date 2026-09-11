@@ -26,6 +26,26 @@ export function getTimeseries(params) {
   return apiFetch('/api/reports/timeseries/', { params: cleanParams(params) })
 }
 
+/**
+ * "Dars qoldirganlar" sahifasi uchun — chegaradan KO'P para SABABSIZ qoldirgan
+ * talabalar ro'yxati.
+ *
+ * `threshold` — sababsiz qoldirilgan paralar chegarasi (standart 9, ya'ni 10 va
+ * undan ortiq qoldirgan talaba ro'yxatga tushadi). `academicYear` berilmasa,
+ * backend joriy o'quv yilini o'zi hisoblaydi.
+ *
+ * Javob: {academic_year, threshold, count, students: [...]}.
+ */
+export function getMissedLessons({ threshold, academicYear, group } = {}) {
+  return apiFetch('/api/reports/missed-lessons/', {
+    params: {
+      threshold,
+      academic_year: academicYear,
+      group,
+    },
+  })
+}
+
 // Login talab qilmaydi — kiosk/bosh sahifa uchun.
 export function getPublicDashboard() {
   return apiFetch('/api/reports/public-dashboard/', { skipAuth: true })

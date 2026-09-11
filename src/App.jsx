@@ -8,6 +8,7 @@ import GroupDetail from './pages/GroupDetail'
 import Groups from './pages/Groups'
 import LiveMonitoring from './pages/LiveMonitoring'
 import Login from './pages/Login'
+import MissedLessons from './pages/MissedLessons'
 import NotFound from './pages/NotFound'
 import Notifications from './pages/Notifications'
 import Profile from './pages/Profile'
@@ -44,7 +45,7 @@ export default function App() {
         <Route
           path="/staff"
           element={
-            <RequireRole roles={[ROLES.SUPERADMIN]}>
+            <RequireRole roles={ADMIN_ROLES}>
               <Staff />
             </RequireRole>
           }
@@ -52,7 +53,7 @@ export default function App() {
         <Route
           path="/live-monitoring"
           element={
-            <RequireRole roles={[ROLES.SUPERADMIN]}>
+            <RequireRole roles={ADMIN_ROLES}>
               <LiveMonitoring />
             </RequireRole>
           }
@@ -105,6 +106,14 @@ export default function App() {
           element={
             <RequireRole roles={REPORTS_ROLES}>
               <Reports />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/missed-lessons"
+          element={
+            <RequireRole roles={REPORTS_ROLES}>
+              <MissedLessons />
             </RequireRole>
           }
         />

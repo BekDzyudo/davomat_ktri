@@ -23,8 +23,13 @@ function mapFeedItemFromApi(item) {
  * cheklanadi (odatda ikkalasi ham bugungi sana). Real vaqtda push
  * (websocket) yo'q — chaqiruvchi tomon davriy so'rov (polling) bilan
  * yangilashi kerak.
+ *
+ * `limit` standart qiymati ataylab backenddagi eng yuqori chegaraga
+ * (`MAX_LIVE_FEED_LIMIT`) teng: "Jonli efir" bir kunlikni TO'LIQ ko'rsatishi
+ * kerak, ya'ni kesib qo'yilgan oxirgi N ta emas. Ilgari bu yerda 200 turardi,
+ * backend esa uni jimgina 50 ga qirqib tashlardi.
  */
-export async function getLiveMonitoring({ type, dateFrom, dateTo, limit = 200 } = {}) {
+export async function getLiveMonitoring({ type, dateFrom, dateTo, limit = 2000 } = {}) {
   const data = await apiFetch('/api/faceid/live/', {
     params: { type, date_from: dateFrom, date_to: dateTo, limit },
   })
